@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <script>
+        function getMobileOperatingSystem() {
+            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            // Windows Phone must come first because its UA also contains "Android"
+            // if (/windows phone/i.test(userAgent)) {
+            //     return "Windows Phone";
+            // }
+            // console.log("USER AGENT", userAgent)
+            if (/android/i.test(userAgent)) {
+                return "Android";
+            }
+
+            // iOS detection 
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return "iOS";
+            }
+
+            return "unknown";
+        }</script>
+
+    <script>
+        function DetectAndServe() {
+            let os = getMobileOperatingSystem();
+            if (os == "Android") {
+                window.location.href = "https://play.google.com/store/apps/details?id=uk.gov.tfl.gotfl";
+            } else if (os == "iOS") {
+                window.location.href = "https://apps.apple.com/in/app/tube-map-london-underground/id320969612";
+                //  } else if (os == "Windows Phone") {
+                //     window.location.href = "https://www.dotsquares.com/"; //microsoft store
+            } else {
+                window.location.href = "https://www.dotsquares.com/"; //App download buttons landing page
+            }
+        }
+    </script>
+</head>
+
+<body onload="DetectAndServe()">
+</body>
+
+</html>

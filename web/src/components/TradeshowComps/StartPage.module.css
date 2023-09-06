@@ -1,0 +1,48 @@
+.home_screen{
+    background: url(../../assets//images/home-screen_bg.svg) center center no-repeat;
+    background-size: cover;
+}
+.top_lft_heading{
+    font-size: 46px;
+    position: absolute;
+    width: 31%;
+    font-size: 46px;
+    color: #fff;
+    top: 13%;
+    left:2.5%;
+}
+.center_ver_hor{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.red_btn{
+    font-size: 42px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 20px;
+    padding:28px;
+    text-align: center;
+    display: inline-block;
+    border: 0;
+    background: #E60200;
+}
+.footer{
+    width:95%;
+    position: absolute;
+    bottom:45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+    left: 0;
+    right: 0;
+}
+
+.footer h6{
+    font-weight: bold;
+    color: #DA291C;
+    font-size: 30px;
+    align-self: flex-end;
+}

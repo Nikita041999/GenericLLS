@@ -1,0 +1,8 @@
+.timer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 54%;
+    left: 45%;
+}

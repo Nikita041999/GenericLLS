@@ -1,0 +1,33 @@
+/* / For moonaru video page / */
+
+.moonaru_videoPage{ display: flex; align-items: center; justify-content: center; padding: 40px 0; min-height: 100vh; }
+.moonaru_videoPage_inside{ width: 100%; max-width: 370px; margin: 0 auto; }
+.moonaru_videoPage_inside h1{ display: block; font-size: 1.6rem;  }
+.videomoonaru{ display: inline-block; position: relative; width: 100%; }
+.videomoonaru video{ width: 100% !important; height: 658px !important; box-shadow: 0 0 0 4px #F06D91; border-radius: 20px; }
+.moonaruMark{ position: absolute; bottom: 120px; right: 20px; z-index: 10; pointer-events: none; }
+.moonaruMark img{ width:120px; display: block; }
+
+@media screen and (max-width: 991px)
+{
+    .videomoonaru video{ box-shadow: 0 0 0 2px #F06D91; border-radius: 10px; }
+    .moonaru_videoPage_inside h1{ font-size: 1.4rem; }
+}
+
+@media screen and (max-width: 767px)
+{
+    .videomoonaru video{ 
+        /* border: 0;  */
+        box-shadow: none;
+         /* border-radius: 0; */
+        border-radius: 10px;
+    box-shadow: 0 0 0 2px #f06d91; }
+}
+
+@media screen and (max-width: 400px)
+{
+    .moonaru_videoPage_inside h1{ padding-left: 15px; padding-right: 15px; }
+}
+
+
+/* / END For moonaru video page / */
