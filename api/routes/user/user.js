@@ -11,7 +11,9 @@ const jwtMiddleware = (req, res, next) => {
     // }
     // next();
   }
-
+  router.get('/',() => {
+    console.log("Hello there");
+  })
 router.post('/login',loginRoute)
 router.post('/signup',sigupRoute)
 router.post('/reset-password',forgetPasswordMail)
