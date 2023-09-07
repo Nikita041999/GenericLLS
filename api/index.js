@@ -39,5 +39,16 @@ const startServer = async () => {
   }
 };
 
+// const teamId = 'IUtYpnYhSLZxFCMBTNGT4gJ8'
+// const result = await fetch(
+//   'https://api.vercel.com/v6/deployments',
+//   {
+//       method: 'GET',
+//       headers: {
+//           Authorization: `Bearer ${teamId}`,
+//       }
+//   }
+// );
+// result()
 // export default app;
 startServer();
