@@ -4,6 +4,7 @@ import { UserContext } from "lib/contexts/userContext";
 import * as Yup from "yup";
 import TopRowImg from "assets/images/top-row-img.svg";
 import styles from "./LoginPlayer.module.css";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const ForgetPassword = () => {
@@ -11,6 +12,7 @@ const ForgetPassword = () => {
   const [error, setError] = useState("");
   const[statusCheck,setStatusCheck] = useState(false)
   const userStore = useContext(UserContext);
+  const navigate = useNavigate()
   const initialValues = {
     email: "",
   };
@@ -67,7 +69,13 @@ const ForgetPassword = () => {
       }
     }
     setShowError(false);
-  }, [showError]);
+    if (error.length > 0) {
+      navigate('/')
+      // setTimeout(() => {
+      //   navigate("/");
+      // }, 3000);
+    }
+  }, [showError,error]);
 
   return (
     <div className={styles.loginPage}>

@@ -77,7 +77,7 @@ const LoginPlayer = () => {
           email_address,
           password,
         };
-        window.localStorage.setItem("user", JSON.stringify(res.data[0]));
+       localStorage.setItem("user", JSON.stringify(res.data[0]));
         navigate(`/introduction`);
         // window.location.href = "/users";
       } else if (res.data.length == 0) {
@@ -135,7 +135,7 @@ const LoginPlayer = () => {
                       autoComplete="off"
                       type="text"
                       className={`${styles.loginformfields} form-control `}
-                      placeholder="E-mail Address"
+                      placeholder="Email Address"
                       name={"email"}
                     />
                     <ErrorMessage
@@ -183,7 +183,7 @@ const LoginPlayer = () => {
                         onClick={handleSignUp}
                       >
                         {" "}
-                        signup
+                        Signup
                       </a>
                     </p>
                   </div>

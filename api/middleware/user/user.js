@@ -1,10 +1,17 @@
 import { getConnection } from "../../db/index.js";
 import { generateJWT, verifyJWT } from "../../utils/jwt.js";
-import { passwordEncryption, generateUniqueToken } from "../../utils/helper.js";
-import { transporter, sendMail } from "../../utils/helper.js";
+import {
+  transporter,
+  sendMail,
+  wordCorrection,
+  passwordEncryption,
+  generateUniqueToken,
+} from "../../utils/helper.js";
 
 export const loginRoute = async (req, res) => {
-  const { email, password } = req.body;
+  console.log('req.body---------->',req.body);
+  let { email, password } = req.body;
+  email = email.trim().toLowerCase();
   let con = await getConnection();
   const enc_pswrd = passwordEncryption(password);
   if (email && password) {
@@ -57,7 +64,7 @@ export const loginRoute = async (req, res) => {
 
 export const sigupRoute = async (req, res) => {
   let con = await getConnection();
-  const {
+  let {
     firstname,
     lastname,
     email,
@@ -71,6 +78,12 @@ export const sigupRoute = async (req, res) => {
     end_time,
     total_time,
   } = req.body;
+  firstname = wordCorrection(firstname)
+    lastname= wordCorrection(lastname)
+    email = email.trim().toLowerCase()
+    institute = wordCorrection(institute)
+    city = wordCorrection(city)
+    country = wordCorrection(country)
   const existingUser = await con.query(
     "SELECT * FROM players WHERE email_address = ?",
     [email]
@@ -126,7 +139,8 @@ export const sigupRoute = async (req, res) => {
 export const forgetPasswordMail = async (req, res) => {
   const uniqueToken = generateUniqueToken();
   let con = await getConnection();
-  const { email } = req.body;
+  let { email } = req.body;
+  email = email.trim().toLowerCase()
   const resetLink = `${process.env.SITE_URL}/change-password?token=${uniqueToken}`;
   // mail id exists
   const mailExist = `select * from players where email_address=?`;
@@ -139,7 +153,7 @@ export const forgetPasswordMail = async (req, res) => {
         .then((data) => {
           sendMail({ resetLink, email });
           return res.send({
-            message: "Mail Sent to your mail ID.",
+            message: "Mail to reset the password has been sent to your mail Id.",
             status: true,
           });
         })
@@ -177,13 +191,8 @@ export const forgetPasswordMail = async (req, res) => {
 };
 
 export const changePassword = async (req, res) => {
-  // console.log("-------->", req.params);
-  // const verified = verifyJWT(req.headers.authorization);
   let con = await getConnection();
   const { password, changePassword, token } = req.body;
-  // if (!verified) {
-  //   return res.status(401).json({ message: "No token provided" });
-  // }
 
   const resetTokenCheck = `SELECT
   id,
@@ -194,7 +203,7 @@ export const changePassword = async (req, res) => {
   con
     .query(resetTokenCheck, [token])
     .then((data) => {
-      console.log("-------->",data[0]);
+      console.log("-------->", data[0]);
       if (data[0].length >= 1) {
         // console.log("resettoekn data ", data[0]);
         const updatePassword = `UPDATE players SET password = ?,reset_token = NULL WHERE id=?;`;
@@ -208,7 +217,7 @@ export const changePassword = async (req, res) => {
             .then((data) => {
               return res.status(200).send({
                 status: true,
-                message: "Updated password successfully.",
+                message: "Password updated successfully.Use your new password to login",
               });
             })
             .catch((err) => {

@@ -37,7 +37,6 @@ const ChangePassword = () => {
       ),
   });
   const handleSubmit = (values) => {
-    console.log("valuessss", values);
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const { password, confirmPassword } = values;
@@ -65,15 +64,8 @@ const ChangePassword = () => {
       });
     }
   };
-  // useEffect(() => {
-  //   const tokenn = JSON.parse(localStorage.getItem("user"));
-  //   if (tokenn) {
-  //     navigate("/");
-  //   }
-  // },[])
   useEffect(() => {
     if (showError == true) {
-      //   toast(error, { type: "error" });
       if(statusCheck==false){
         toast.error(error, {
           position: "top-right",
@@ -100,23 +92,13 @@ const ChangePassword = () => {
     }
     setShowError(false);
     if (error.length > 0) {
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
+      navigate('/')
+      // setTimeout(() => {
+      //   navigate("/");
+      // }, 3000);
     }
   }, [showError, error]);
 
-  // useEffect(() => {
-  //   const params = new URLSearchParams(window.location.search);
-
-  //   // Get the 'token' parameter value
-  //   const token = params.get('token');
-
-  //   if (token) {
-  //     console.log(token);
-  //     // Do something with the 'token' value
-  //   }
-  // },[])
   return (
     <div className={styles.loginPage}>
     <div className="top-hor-img">

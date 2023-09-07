@@ -2,86 +2,83 @@ import React, { useEffect, useState } from "react";
 import WhiteArrow from "assets/images/white-arrow.svg";
 import styles from "./LoginPlayer.module.css";
 import TimerModal from "./Modal/TimerModal";
-import audioFile from "../../assets/sounds/Quiz_NotPlaying.mp3"
+import audioFile from "../../assets/sounds/Quiz_NotPlaying.mp3";
 import { usePlayerContext } from "lib/contexts/playerContext";
-
 import { Prompt, useNavigate } from "react-router-dom";
-
+import { Circles } from "react-loader-spinner";
 const QuizIntro = () => {
   const navigate = useNavigate();
-  const { handleQuizNotPlayingAudio,audioRef,pageSwitch,handleQuixStop } = usePlayerContext();
+  const { handleQuizNotPlayingAudio, audioRef, pageSwitch, handleQuixStop } =
+    usePlayerContext();
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(true);
   const [startQuiz, setStartQuiz] = useState(false);
+  const [token, setToken] = useState({});
   // const [startQuiz, setStartQuiz] = useState(false);
   // const [pageSwitch, setPageSwitch] = useState(false);
   const handleStartQuiz = () => {
     // handleQuizNotPlayingAudio()
     setStartQuiz(true);
- 
   };
 
   const onHide = () => {
-    // sessionStorage.removeItem("started")
-    localStorage.removeItem("started")
-    handleQuizNotPlayingAudio()
+    localStorage.removeItem("started");
+    handleQuizNotPlayingAudio();
   };
 
   const handleLogout = (event) => {
     event.preventDefault();
     // localStorage.removeItem("user-token");
     // localStorage.removeItem("user");
-    localStorage.clear()
+    localStorage.clear();
     // sessionStorage.clear()
     // navigate('/')
     window.location.href = "/";
   };
-  //   const token = JSON.parse(sessionStorage.getItem("player"));
-  //   console.log("------>", token.firstname);
 
-  //   // If token is not found, navigate to login page
-  //   if (!token) {
-  //     navigate("/signup");
-  //   }
-  //   if (token && pageSwitch) {
-  //     setName(token.firstname);
-  //     navigate("/quiz");
-  //   }
-  // }, [navigate, pageSwitch]);
-  // useEffect(() => {
-  //   const token = JSON.parse(sessionStorage.getItem("player"));
-  //   console.log("-- token.firstname in quizIntro---->", token.firstname);
-
-  //   // If token is not found, navigate to login page
-  //   if (!token) {
-  //     navigate("/signup");
-  //   }
-  //   if (token && pageSwitch) {
-  //     setName(token.firstname);
-  //     navigate("/quiz");
-  //   }
-  // }, [pageSwitch]);
-useEffect(() => {
-  window.scrollTo(0, 0)
-}, [])
   useEffect(() => {
-    const token2 = JSON.parse(localStorage.getItem("q_no"));
-    if ( token2) {
+    window.scrollTo(0, 0);
+    const token_qno = JSON.parse(localStorage.getItem("q_no"));
+    if (token_qno) {
       navigate("/quiz");
     }
-    const tokenn = JSON.parse(localStorage.getItem("user"));
-    if (!tokenn) {
+    const userToken = JSON.parse(localStorage.getItem("user"));
+    if (!userToken) {
       navigate("/");
+    } else {
+      // console.log("userToken----->",userToken);
+      setToken(userToken);
+      setLoading(false);
     }
-    setName(tokenn.firstname);
   }, []);
 
-  return startQuiz ? (
+  useEffect(() => {
+    setName(token.firstname);
+  }, [loading, token]);
+
+  return loading ? (
+    <div className={styles.quiz_loader}>
+      <Circles
+        height="80"
+        width="80"
+        color="#DA291C"
+        ariaLabel="circles-loading"
+        wrapperStyle={{}}
+        wrapperClass=""
+        visible={true}
+      />
+    </div>
+  ) : startQuiz ? (
     <TimerModal show={startQuiz} onHide={onHide} />
   ) : (
     <div className={`${styles.introbg}`}>
       <div className={`${styles.container_fluid}`}>
-        <div style={{display:"flex",justifyContent:"space-between"}}><h2 style={{marginBottom:"0px"}}>Hello, {name}</h2>
-        <button className={styles.logout_btn} onClick={handleLogout}>logout</button></div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h2 style={{ marginBottom: "0px" }}>Hello, {name}</h2>
+          <button className={styles.logout_btn} onClick={handleLogout}>
+            logout
+          </button>
+        </div>
         <div className="row">
           <div className="col-md-9">
             <p> Welcome to the Gore Educational Challenge!</p>

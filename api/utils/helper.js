@@ -19,6 +19,11 @@ export function generateUniqueToken() {
   return CryptoJS.SHA512(randomString, process.env.EncryptionKEY).toString();
 }
 
+export function wordCorrection(str) {
+  str = str.trim().toLowerCase();
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 // Create a transporter using the default SMTP transport
 export const transporter = nodemailer.createTransport({
   host: "mail.24livehost.com",// process.env.EMAIL_HOST,

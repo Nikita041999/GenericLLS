@@ -194,7 +194,7 @@ const SignupPlayer = () => {
                       autoComplete="off"
                       type="text"
                       className={`${styles.loginformfields} form-control `}
-                      placeholder="E-mail Address"
+                      placeholder="Email Address"
                       name={"email"}
                     />
                     <ErrorMessage
