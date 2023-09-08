@@ -17,7 +17,7 @@ app.use(express.json());
 
 // Use the login and logout routes
 app.get('/',(req,res) => {
-  return res.send({mesage:"Get updated api successfully called."})
+  return res.send({mesage:"Get updated **** api successfully called."})
 })
 app.use('/api',router);
 
