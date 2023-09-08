@@ -189,7 +189,8 @@ const LoginPlayer = () => {
                   </div>
                   <button className={`${styles.red_btn}`} type="submit">
                     {" "}
-                    Sign In 
+                    {/* Sign In  */}
+                    Login
                     {/* <img src={WhiteArrow} />{" "} */}
                   </button>
                 </div>
