@@ -1,5 +1,5 @@
 /api/node_modules
-/api/.env
+# /api/.env
 /web/node_modules
 /web/.env
 /web/build
