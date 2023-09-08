@@ -14,8 +14,8 @@ const axiosClient = axios.create({
   // baseURL: process.env.REACT_APP_DEV_BASEURL,
   // baseURL: "https://tradeshowappnew.24livehost.com:4001",
   // baseURL: "https://tradeshowapp.24livehost.com:4001",
-  baseURL: `http://localhost:4000`,
-  // baseURL: `https://generic-lls.vercel.app`,
+  // baseURL: `http://localhost:4000`,
+  baseURL: `https://generic-lls.vercel.app`,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
