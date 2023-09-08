@@ -16,10 +16,11 @@ app.use(express.json());
 //-------------- jwt Middleware -------------------
 
 // Use the login and logout routes
+app.get('/',(req,res) => {
+  return res.send({mesage:"Get api successfully called."})
+})
 app.use('/api',router);
-// app.get('/',(req,res) => {
-//   return res.send({mesage:"Get api successfully called."})
-// })
+
 
 
 const startServer = async () => {
