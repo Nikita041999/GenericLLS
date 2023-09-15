@@ -7,7 +7,7 @@ import React, {
 } from "react";
 // import { Formik, useFormik } from "formik";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import TextField from "../InputFields/TextField";
 import TopRowImg from "assets/images/top-row-img.svg";
 import WhiteArrow from "assets/images/white-arrow.svg";
@@ -17,13 +17,22 @@ import { userLogin } from "../../lib/network/loginauth";
 import { usePlayerContext } from "lib/contexts/playerContext";
 import { toast } from "react-toastify";
 import { UserContext } from "lib/contexts/userContext";
+// import { GoogleLoginButton } from "react-social-login-buttons";
+import GlobalLoginButtons from "./GlobalLoginButtons";
+
 import * as Yup from "yup";
+import { getGitHubUrl } from "utils/getGithubUrl";
+import { getGoogleUrl } from "utils/getGoogleUrl";
+import { getLinkedInUrl } from "utils/getLinkedInUrl";
+import { getFacebookUrl } from "utils/getFacebookUrl";
+import { getTwitterUrl } from "utils/getTwitterUrl";
 
 const LoginPlayer = () => {
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [error, setError] = useState("");
   const [audio, SetAudio] = useState("");
+  const [provider, setProvider] = useState("");
   //   const [emailCheck, setEmailCheck] = useState(false);
   const navigate = useNavigate();
   const userStore = useContext(UserContext);
@@ -41,13 +50,274 @@ const LoginPlayer = () => {
     password: Yup.string().required("Password is required."),
   });
 
-  useEffect(() => {
+  async function getGithubUserData() {
+    const token = "Bearer " + localStorage.getItem("accessToken");
+    fetch("http://localhost:4000/getGithubUserData", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.data != undefined) {
+          const value = { login: data.data.login, id: data.data.id };
+          localStorage.setItem("user", JSON.stringify(value));
+          navigate(`/introduction`);
+        } else {
+          localStorage.removeItem("accessToken");
+        }
+      })
+      .catch((err) => {
+        // const errors = res.error;
+        console.log("*****", err);
+      });
+  }
+  async function googleUserData(){
+    const token = "Bearer " + localStorage.getItem("accessToken");
+    fetch("http://localhost:4000/getGoogleUserData", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(1);
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.data != undefined) {
+          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          localStorage.setItem("user", JSON.stringify(value));
+          navigate(`/introduction`);
+        } else {
+          localStorage.removeItem("accessToken");
+        }
+      })
+      .catch((err) => {
+        // const errors = res.error;
+        console.log("*****", err);
+      });
+  }
+  async function facebookUserData(){
+    console.log("*****");
+    const token = "Bearer " + localStorage.getItem("accessToken");
+    fetch("http://localhost:4000/getFacebookUserData", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(1);
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.data != undefined) {
+          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          localStorage.setItem("user", JSON.stringify(value));
+          navigate(`/introduction`);
+        } else {
+          localStorage.removeItem("accessToken");
+        }
+      })
+      .catch((err) => {
+        // const errors = res.error;
+        console.log("*****", err);
+      });
+  }
+
+  async function linkedInUserData(){
+    const token = "Bearer " + localStorage.getItem("accessToken");
+    fetch("http://localhost:4000/getLinkedUserData", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.data != undefined) {
+          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          localStorage.setItem("user", JSON.stringify(value));
+          navigate(`/introduction`);
+        } else {
+          localStorage.removeItem("accessToken");
+        }
+      })
+      .catch((err) => {
+        // const errors = res.error;
+        console.log("*****", err);
+      });
+  }
+  async function twitterUserData(){
+    const token = "Bearer " + localStorage.getItem("accessToken");
+    fetch("http://localhost:4000/getTwitterUserData", {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        if (data.data != undefined) {
+          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          localStorage.setItem("user", JSON.stringify(value));
+          navigate(`/introduction`);
+        } else {
+          localStorage.removeItem("accessToken");
+        }
+      })
+      .catch((err) => {
+        // const errors = res.error;
+        console.log("*****", err);
+      });
+  }
+  useEffect(() => { 
     const token = JSON.parse(localStorage.getItem("user"));
     if (token) {
       navigate("/introduction");
     }
     SetAudio(new Audio(audioFile));
+
+    if (localStorage.getItem("provider")) {
+      console.log(provider);
+      const selectedProvider = localStorage.getItem("provider");
+      if (selectedProvider == "google") {
+        console.log("Its google");
+        setProvider("google");
+      } else if (selectedProvider == "github") {
+        setProvider("github");
+      }
+      else if (selectedProvider == "linkedin") {
+        setProvider("linkedin");
+      }else if (selectedProvider == "facebook") {
+        setProvider("facebook");
+      }else if (selectedProvider == "twitter") {
+        setProvider("twitter");
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const codeParam = urlParams.get("code");
+    console.log("codeParam", codeParam);
+    console.log("------>",provider);
+    if (codeParam && localStorage.getItem("accessToken") === null) {
+      async function getGithubAccessToken() {
+        await fetch(
+          "http://localhost:4000/getGithubAccessToken?code=" + codeParam,
+          {
+            method: "GET",
+          }
+        )
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (data.access_token) {
+              localStorage.setItem("accessToken", data.access_token);
+            }
+          })
+          .then((res) => {
+            getGithubUserData();
+          });
+      }
+      async function getGoogleAccessToken() {
+        await fetch(
+          "http://localhost:4000/getGoogleAccessToken?code=" + codeParam,
+          {
+            method: "GET",
+          }
+        )  .then((res) => {
+          return res.json();
+        })
+          .then((data) => {
+            if (data.access_token) {
+              localStorage.setItem("accessToken", data.access_token);
+              googleUserData()
+            }
+          })
+          // .then((res) => {
+          //   googleUserData();
+          // });
+      }
+      async function getLinkedInAccessToken(){
+        await fetch(
+          "http://localhost:4000/getLinkedInAccessToken?code=" + codeParam,
+          {
+            method: "GET",
+          }
+        )  .then((res) => {
+          return res.json();
+        })
+          .then((data) => {
+            if (data.access_token) {
+              localStorage.setItem("accessToken", data.access_token);
+              linkedInUserData()
+            }
+          })
+      }
+      async function getFacebookAccessToken(){
+        console.log("ffb");
+        await fetch(
+          "http://localhost:4000/getFacebookAccessToken?code=" + codeParam,
+          {
+            method: "GET",
+          }
+        )  .then((res) => {
+          return res.json();
+        })
+          .then((data) => {
+            if (data.access_token) {
+              localStorage.setItem("accessToken", data.access_token);
+              facebookUserData()
+            }
+          })
+      }
+      async function getTwitterAccessToken(){
+        await fetch(
+          "http://localhost:4000/getTwitterAccessToken?code=" + codeParam,
+          {
+            method: "GET",
+          }
+        )  .then((res) => {
+          return res.json();
+        })
+          .then((data) => {
+            if (data.access_token) {
+              localStorage.setItem("accessToken", data.access_token);
+              twitterUserData()
+            }
+          })
+      }
+      if (provider == "google") {
+        getGoogleAccessToken()
+      } else if (provider == "github") {
+        getGithubAccessToken();
+      }else if (provider == "linkedin") {
+        getLinkedInAccessToken();
+      }else if (provider == "facebook") {
+        console.log("provider",provider);
+        getFacebookAccessToken();
+      }else if (provider == "twitter") {
+        getTwitterAccessToken();
+      }
+    }
+  }, [provider]);
 
   useEffect(() => {
     if (showError == true) {
@@ -77,7 +347,7 @@ const LoginPlayer = () => {
           email_address,
           password,
         };
-       localStorage.setItem("user", JSON.stringify(res.data[0]));
+        localStorage.setItem("user", JSON.stringify(res.data[0]));
         navigate(`/introduction`);
         // window.location.href = "/users";
       } else if (res.data.length == 0) {
@@ -105,6 +375,37 @@ const LoginPlayer = () => {
         return err;
       });
   };
+
+  const handleProviderIdentity = (e) => {
+    let text = e.target.textContent;
+    if (text.toLowerCase().includes("google")) {
+      localStorage.setItem("provider", "google");
+    } else if (text.toLowerCase().includes("github")) {
+      localStorage.setItem("provider", "github");
+    }else if (text.toLowerCase().includes("linkedin")) {
+      localStorage.setItem("provider", "linkedin");
+    }else if (text.toLowerCase().includes("facebook")) {
+      localStorage.setItem("provider", "facebook");
+    }else if (text.toLowerCase().includes("twitter")) {
+      localStorage.setItem("provider", "twitter");
+    }
+  };
+
+  const handleGoogleLogin = (e) => {
+    e.preventDefault();
+    handleProviderIdentity(e);
+    const url = getGoogleUrl();
+    // console.log(url);
+    window.location.assign(`${url}`);
+  };
+
+  const handleGithubLogin = (e) => {
+    e.preventDefault();
+    handleProviderIdentity(e);
+    const url = getGitHubUrl();
+    // console.log(url);
+    window.location.assign(`${url}`);
+  };
   const handleSignUp = (e) => {
     e.preventDefault();
     navigate("/signup");
@@ -114,6 +415,28 @@ const LoginPlayer = () => {
     navigate("/forgot-password");
     // userStore.userChangePassword()
   };
+  const handleLinkedInLogin = (e) => {
+    e.preventDefault();
+    handleProviderIdentity(e);
+    const url = getLinkedInUrl();
+    // const url = 'http://localhost:3000/auth/linkedin'
+    window.location.assign(`${url}`);
+  }
+  
+  const handleTwitterLogin = (e) => {
+    e.preventDefault();
+    handleProviderIdentity(e);
+    const url = getTwitterUrl();
+    // const url = 'http://localhost:3000/auth/linkedin'
+    window.location.assign(`${url}`);
+  }
+  const handleFacebookLogin = (e) => {
+    e.preventDefault();
+    handleProviderIdentity(e);
+    const url = getFacebookUrl();
+    // const url = 'http://localhost:3000/auth/linkedin'
+    window.location.assign(`${url}`);
+  }
   return (
     <div className={styles.loginPage}>
       <div className="top-hor-img">
@@ -166,10 +489,16 @@ const LoginPlayer = () => {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    margin:"0px !important"
+                    margin: "0px !important",
                   }}
                 >
-                  <div style={{display:"flex", justifyContent:"space-between", margin:"0rem 1rem 0.5rem 1rem"}}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      margin: "0rem 1rem 0.5rem 1rem",
+                    }}
+                  >
                     <p style={{ marginBottom: "0", cursor: "pointer" }}>
                       <a onClick={handleForgotPassword}>Forgot Password?</a>
                     </p>
@@ -193,6 +522,15 @@ const LoginPlayer = () => {
                     Login
                     {/* <img src={WhiteArrow} />{" "} */}
                   </button>
+                  <div>
+                    <GlobalLoginButtons
+                      handleGithubLogin={handleGithubLogin}
+                      handleGoogleLogin={handleGoogleLogin}
+                      handleLinkedInLogin={handleLinkedInLogin}
+                      handleTwitterLogin={handleTwitterLogin}
+                      handleFacebookLogin={handleFacebookLogin}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

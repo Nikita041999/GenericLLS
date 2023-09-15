@@ -9,7 +9,6 @@ import {
 } from "../../utils/helper.js";
 
 export const loginRoute = async (req, res) => {
-  console.log('req.body---------->',req.body);
   let { email, password } = req.body;
   email = email.trim().toLowerCase();
   let con = await getConnection();
@@ -78,12 +77,12 @@ export const sigupRoute = async (req, res) => {
     end_time,
     total_time,
   } = req.body;
-  firstname = wordCorrection(firstname)
-    lastname= wordCorrection(lastname)
-    email = email.trim().toLowerCase()
-    institute = wordCorrection(institute)
-    city = wordCorrection(city)
-    country = wordCorrection(country)
+  firstname = wordCorrection(firstname);
+  lastname = wordCorrection(lastname);
+  email = email.trim().toLowerCase();
+  institute = wordCorrection(institute);
+  city = wordCorrection(city);
+  country = wordCorrection(country);
   const existingUser = await con.query(
     "SELECT * FROM players WHERE email_address = ?",
     [email]
@@ -140,7 +139,7 @@ export const forgetPasswordMail = async (req, res) => {
   const uniqueToken = generateUniqueToken();
   let con = await getConnection();
   let { email } = req.body;
-  email = email.trim().toLowerCase()
+  email = email.trim().toLowerCase();
   const resetLink = `${process.env.SITE_URL}/change-password?token=${uniqueToken}`;
   // mail id exists
   const mailExist = `select * from players where email_address=?`;
@@ -153,7 +152,8 @@ export const forgetPasswordMail = async (req, res) => {
         .then((data) => {
           sendMail({ resetLink, email });
           return res.send({
-            message: "Mail to reset the password has been sent to your mail Id.",
+            message:
+              "Mail to reset the password has been sent to your mail Id.",
             status: true,
           });
         })
@@ -166,28 +166,6 @@ export const forgetPasswordMail = async (req, res) => {
       return res.send({ message: "Mail Id does not exist.", status: false });
     }
   });
-  // sendMail(resetLink).then(res => {
-
-  //   res.send({ message: "Mail Sent to your mail ID." })
-  // }).catch(err => {
-  //   res.send({ message: "Mail Sent to your mail ID." })
-  // });
-  // const sql =
-  // "UPDATE players SET reset_token = ?, reset_token_expires = NOW() + INTERVAL 1 HOUR WHERE email = ?";
-
-  // mailTransporter.sendMail(mailDetails,
-  // (err,info) => {
-  //   console.log(1);
-  //   if (err) {
-  //     console.log("*****errr********",err);
-  //     res.send('Email could not be sent.');
-  //     return;
-  //   }
-  //  else{
-  //   console.log("11111111111111");
-  //   res.send({message:'Password reset email sent successfully!'});
-  //  }
-  // });
 };
 
 export const changePassword = async (req, res) => {
@@ -203,7 +181,6 @@ export const changePassword = async (req, res) => {
   con
     .query(resetTokenCheck, [token])
     .then((data) => {
-      console.log("-------->", data[0]);
       if (data[0].length >= 1) {
         // console.log("resettoekn data ", data[0]);
         const updatePassword = `UPDATE players SET password = ?,reset_token = NULL WHERE id=?;`;
@@ -217,7 +194,8 @@ export const changePassword = async (req, res) => {
             .then((data) => {
               return res.status(200).send({
                 status: true,
-                message: "Password updated successfully.Use your new password to login",
+                message:
+                  "Password updated successfully.Use your new password to login",
               });
             })
             .catch((err) => {
@@ -249,4 +227,351 @@ export const logoutRoute = (req, res) => {
   return res.send({ Message: "User Logged out." });
 };
 
-export const resetPassword = (req, res) => {};
+export const githubUserData = async (req, res) => {
+  let con = await getConnection();
+  await fetch("https://api.github.com/user", {
+    method: "GET",
+    headers: {
+      Authorization: req.get("Authorization"),
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      const insertUserWithoutEmail = `INSERT INTO players (social_id,avatar_url) VALUES (?,?)`;
+      const insertUserWithEmail = `INSERT INTO players (social_id,email_address,avatar_url) VALUES (?,?,?)`;
+      const idExistQuery = `select * from players where social_id=?`;
+      if (data.email === null) {
+        con
+          .query(idExistQuery, [data.id])
+          .then((data1) => {
+            if (data1[0].length == 0) {
+              con
+                .query(insertUserWithoutEmail, [data.id, data.avatar_url])
+                .then((val) => {
+                  return res.send({
+                    status: true,
+                    message: "User logged in.",
+                    data: data,
+                  });
+                });
+            } else {
+              return res.send({
+                status: true,
+                message: "User already exists.",
+                data: data,
+              });
+            }
+          })
+          .catch((err) => {
+            return res.send({ status: false, message: err });
+          });
+      } else {
+        con
+          .query(idExistQuery, [data.id])
+          .then((data1) => {
+            if (data1[0].length == 0) {
+              con
+                .query(insertUserWithEmail, [
+                  data.id,
+                  data.email,
+                  data.avatar_url,
+                ])
+                .then((val) => {
+                  return res.send({
+                    status: true,
+                    message: "User logged in.",
+                    data: data,
+                  });
+                });
+            } else {
+              return res.send({
+                status: true,
+                message: "User already exists.",
+                data: data,
+              });
+            }
+          })
+          .catch((err) => {
+            return res.send({ status: false, message: err });
+          });
+      }
+    });
+};
+
+export const githubAccessToken = async (req, res) => {
+  const params =
+    "?client_id=" +
+    process.env.Github_ClientID +
+    "&client_secret=" +
+    process.env.Github_Client_Secret +
+    "&code=" +
+    req.query.code;
+  await fetch("https://github.com/login/oauth/access_token" + params, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      res.json(data);
+    });
+};
+export const googleAccessToken = async (req, res) => {
+  const code = req.query.code;
+
+  const tokenUrl = "https://accounts.google.com/o/oauth2/token";
+  const tokenData = `code=${code}&client_id=${process.env.Google_ClientID}&client_secret=${process.env.Google_Client_Secret}&redirect_uri=${process.env.Google_Redirect_URI}&grant_type=authorization_code`;
+
+  await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: tokenData,
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      console.log("------>", data);
+      return res.json(data);
+    });
+};
+export const googleUserData = async (req, res) => {
+  let con = await getConnection();
+  const userResponse = await fetch(
+    "https://www.googleapis.com/oauth2/v2/userinfo",
+    {
+      headers: {
+        // Authorization: `Bearer ${access_token}`,
+        Authorization: req.get("Authorization"),
+      },
+    }
+  );
+  const userData = await userResponse.json();
+  console.log("userData", userData);
+  const name = userData.name.split(" ");
+  console.log(name);
+  const insertUserWithEmail = `INSERT INTO players (firstname,lastname,social_id,email_address,avatar_url) VALUES (?,?,?,?,?)`;
+  const idExistQuery = `select * from players where social_id=?`;
+  con
+    .query(idExistQuery, [userData.id])
+    .then((data1) => {
+      if (data1[0].length == 0) {
+        console.log(0);
+        con
+          .query(insertUserWithEmail, [
+            name[0],
+            name[1],
+            userData.id,
+            userData.email,
+            userData.picture,
+          ])
+          .then((val) => {
+            console.log("data.....", userData);
+            return res.send({
+              status: true,
+              message: "User logged in.",
+              data: userData,
+            });
+          });
+      } else {
+        return res.send({
+          status: true,
+          message: "User already exists.",
+          data: userData,
+        });
+      }
+    })
+    .catch((err) => {
+      return res.send({ status: false, message: err });
+    });
+};
+
+export const linkedAccessToken = async (req, res) => {
+  const { code } = req.query;
+  console.log(1);
+  console.log(code);
+  // Prepare the request parameters
+  const tokenData = `grant_type=authorization_code&code=${code}&redirect_uri=${process.env.Google_Redirect_URI}&client_id=${process.env.LinkedIn_CLientID}&client_secret=${process.env.LinkedIn_CLient_Secret}`;
+
+  await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: tokenData,
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      console.log("------>", data);
+      return res.json(data);
+    });
+};
+
+export const linkedAccessData = async (req, res) => {
+  const userResponse = await fetch("https://api.linkedin.com/v2/me", {
+    headers: {
+      Authorization: req.get("Authorization"),
+    },
+  });
+  const userData = await userResponse.json();
+  console.log("userData--------->", userData);
+  // const name = userData.name.split(" ");
+  // console.log(name);
+  // const insertUserWithEmail = `INSERT INTO players (firstname,lastname,social_id,email_address,avatar_url) VALUES (?,?,?,?,?)`;
+  // const idExistQuery = `select * from players where social_id=?`;
+  // con
+  //   .query(idExistQuery, [userData.id])
+  //   .then((data1) => {
+  //     if (data1[0].length == 0) {
+  //       console.log(0);
+  //       con
+  //         .query(insertUserWithEmail, [
+  //           name[0],
+  //           name[1],
+  //           userData.id,
+  //           userData.email,
+  //           userData.picture,
+  //         ])
+  //         .then((val) => {
+  //           console.log("data.....", userData);
+  //           return res.send({
+  //             status: true,
+  //             message: "User logged in.",
+  //             data: userData,
+  //           });
+  //         });
+  //     } else {
+  //       return res.send({
+  //         status: true,
+  //         message: "User already exists.",
+  //         data: userData,
+  //       });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     return res.send({ status: false, message: err });
+  //   });
+};
+export const facebookAccessToken = async (req, res) => {
+  const { code } = req.query;
+  // Prepare the request parameters
+  // const tokenData = await fetch(
+  //   `client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`
+  // );
+ 
+   await fetch(
+    `https://graph.facebook.com/v12.0/oauth/access_token?client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`
+  )
+  // await fetch("https://graph.facebook.com/v11.0/oauth/access_token", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/x-www-form-urlencoded",
+  //   },
+  //   body: `client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`,
+  // })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      console.log("------>", data);
+      return res.json(data);
+    });
+};
+export const facebookAccessData = async (req, res) => {
+  console.log(")))))))))))");
+  console.log('********',req.get("Authorization"));
+  // https://graph.facebook.com/v12.0/oauth/access_token?${querystring.stringify(tokenParams)}
+  const userResponse = await fetch("https://graph.facebook.com/v12.0/oauth", {
+    headers: {
+      Authorization: req.get("Authorization"),
+    },
+  });
+  const userData = await userResponse.json();
+  console.log("userData--------->", userData);
+};
+
+export const twitterAccessToken = async (req, res) => {
+  const { code } = req.query;
+  console.log(1);
+  console.log(code);
+  const twitterAuthParams = {
+    consumer_key: process.env.Twitter_Consumer_Key,
+    consumer_secret: process.env.Twitter_Consumer_Secret,
+    // oauth_verifier: code,
+  };
+  const twitterAuthHeaders = {
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+  };
+  fetch('https://api.twitter.com/oauth/access_token', {
+    method: 'POST',
+    headers: twitterAuthHeaders,
+    body: new URLSearchParams(twitterAuthParams).toString(),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to obtain access token');
+      }
+      return response.text();
+    }) .then((data) => {
+      // Parse the response data to extract the access token and access token secret.
+      const params = new URLSearchParams(data);
+      const accessToken = params.get('oauth_token');
+      const accessTokenSecret = params.get('oauth_token_secret');
+      console.log("accessToken---->",accessToken);
+      console.log("accessTokenSecret----->",accessTokenSecret);
+      // Proceed to the next steps.
+    })
+    .catch((error) => {
+      // Handle errors.
+    });  
+
+};
+
+export const twitterAccessData = async (req, res) => {
+  // we need to encrypt our twitter client id and secret here in base 64 (stated in twitter documentation)
+  const BasicAuthToken = Buffer.from(
+    `${process.env.Twitter_ClientID}:${process.env.Twitter_Client_Secret}`,
+    "utf8"
+  ).toString("base64");
+
+  twitterOauthTokenParams = {
+    client_id: process.env.Twitter_ClientID,
+    // based on code_challenge
+    code_verifier: "8KxxO-RPl0bLSxX5AWwgdiFbMnry_VOKzFeIlVA7NoA",
+    redirect_uri: `http://www.localhost:3000`,
+    grant_type: "authorization_code",
+  };
+  const tokenParams = new URLSearchParams({
+    ...twitterOauthTokenParams,
+    code,
+  });
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: `Basic ${BasicAuthToken}`,
+  };
+  const requestOptions = {
+    method: "POST",
+    headers: headers,
+    body: tokenParams.toString(),
+  };
+
+  await fetch("https://api.twitter.com/2/oauth2/token", requestOptions)
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      console.log("------>", data);
+      return res.json(data);
+    });
+};
+
+export const anc = async (req, res) => {};

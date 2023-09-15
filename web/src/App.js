@@ -25,44 +25,43 @@ import Result from "./components/TradeshowComps/LeaderBoard/Result";
 import { AuthRoute } from "Routes/AuthRoute";
 import SignupPlayer from "components/TradeshowComps/SignupPlayer";
 import ForgetPassword from "components/TradeshowComps/ForgetPassword";
+import { LoginSocialGoogle } from "reactjs-social-login";
+// import { GoogleLoginButton } from "react-social-login-buttons";
+
+import { useState } from "react";
+import { useCallback } from "react";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleOneTapLogin } from "@react-oauth/google";
+
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
 // import PlayerLoginProtectedRoute from "Routes/PlayerLoginProtectedRoute";
 
 function App() {
-  const { started, setStarted } = usePlayerContext();
-  useEffect(() => {
-    //  console.log("******started***",started);
-    //   if (started) {
-    //     audioRef.current === null
-    //       ? console.log("Audio component is not loaded yet.")
-    //       : audioRef.current.play();
-    //   }else{
-    //     audioRef.current.play()
-    //   }
-  }, []);
+  // const { started, setStarted } = usePlayerContext();
+
   const audioRef = useRef(null);
 
-  useEffect(() => {
-    let sessionStarted = sessionStorage.getItem("started");
-    // console.log("***sessionStarted****",sessionStarted);
-    if (sessionStarted == "yes") {
-      setStarted(true);
-    }
-    if (started == true) {
-      audioRef.current === null
-        ? console.log("Audio component is not loaded yet.")
-        : audioRef.current.play();
-    } else {
-      // console.log("***music paused***");
-      audioRef.current.pause();
-    }
-    audioRef.current.loop = true;
-  }, [started]);
+  // useEffect(() => {
+  //   let sessionStarted = sessionStorage.getItem("started");
+  //   // console.log("***sessionStarted****",sessionStarted);
+  //   if (sessionStarted == "yes") {
+  //     setStarted(true);
+  //   }
+  //   if (started == true) {
+  //     audioRef.current === null
+  //       ? console.log("Audio component is not loaded yet.")
+  //       : audioRef.current.play();
+  //   } else {
+  //     // console.log("***music paused***");
+  //     audioRef.current.pause();
+  //   }
+  //   audioRef.current.loop = true;
+  // }, [started]);
   // console.log();
   return (
     <div className="">
       <audio ref={audioRef} src={audioFile} autoPlay />
-      {/* <PlayerContextProvider> */}
       <UserProvider>
         <ToastContainer
           autoClose={10000}
@@ -191,7 +190,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </UserProvider>
-      {/* </PlayerContextProvider> */}
+
     </div>
   );
 }
