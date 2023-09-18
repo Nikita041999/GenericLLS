@@ -467,17 +467,17 @@ export const facebookAccessToken = async (req, res) => {
   // const tokenData = await fetch(
   //   `client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`
   // );
- 
-   await fetch(
+
+  await fetch(
     `https://graph.facebook.com/v12.0/oauth/access_token?client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`
   )
-  // await fetch("https://graph.facebook.com/v11.0/oauth/access_token", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/x-www-form-urlencoded",
-  //   },
-  //   body: `client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`,
-  // })
+    // await fetch("https://graph.facebook.com/v11.0/oauth/access_token", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/x-www-form-urlencoded",
+    //   },
+    //   body: `client_id=${process.env.Facebook_ClientID}&redirect_uri=${process.env.Google_Redirect_URI}&client_secret=${process.env.Facebook_Client_Secret}&code=${code}`,
+    // })
     .then((res) => {
       return res.json();
     })
@@ -487,8 +487,6 @@ export const facebookAccessToken = async (req, res) => {
     });
 };
 export const facebookAccessData = async (req, res) => {
-  console.log(")))))))))))");
-  console.log('********',req.get("Authorization"));
   // https://graph.facebook.com/v12.0/oauth/access_token?${querystring.stringify(tokenParams)}
   const userResponse = await fetch("https://graph.facebook.com/v12.0/oauth", {
     headers: {
@@ -501,77 +499,110 @@ export const facebookAccessData = async (req, res) => {
 
 export const twitterAccessToken = async (req, res) => {
   const { code } = req.query;
-  console.log(1);
-  console.log(code);
   const twitterAuthParams = {
     consumer_key: process.env.Twitter_Consumer_Key,
     consumer_secret: process.env.Twitter_Consumer_Secret,
     // oauth_verifier: code,
   };
   const twitterAuthHeaders = {
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
   };
-  fetch('https://api.twitter.com/oauth/access_token', {
-    method: 'POST',
-    headers: twitterAuthHeaders,
-    body: new URLSearchParams(twitterAuthParams).toString(),
+
+  const url = "https://api.twitter.com/2/oauth2/token";
+  const clientId = "QkZMQXVNXzAxWlcyZ21WU0daZGo6MTpjaQ";
+  const redirectUri = "http://localhost:3000";
+  const code_challenge = "y_SfRG4BmOES02uqWeIkIgLQAlTBggyf_G7uKT51ku8";
+  const clientSecret = "vqc3uwmGWXAU0KTDr_5aI2lrMZwfJXfc2r87o33E5myAtYH-mw";
+  const body = new URLSearchParams();
+  body.append("grant_type", "authorization_code");
+  body.append("client_id", clientId);
+
+  body.append("redirect_uri", redirectUri);
+  body.append("code_verifier", code_challenge);
+  body.append("code", code);
+
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`, // Add Basic authorization header
+  };
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: body,
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Failed to obtain access token');
-      }
-      return response.text();
-    }) .then((data) => {
-      // Parse the response data to extract the access token and access token secret.
-      const params = new URLSearchParams(data);
-      const accessToken = params.get('oauth_token');
-      const accessTokenSecret = params.get('oauth_token_secret');
-      console.log("accessToken---->",accessToken);
-      console.log("accessTokenSecret----->",accessTokenSecret);
-      // Proceed to the next steps.
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("********", data);
+      // console.log("------>", data);
+      return res.json(data);
     })
     .catch((error) => {
-      // Handle errors.
-    });  
-
+      console.error("Error:", error);
+    });
 };
 
 export const twitterAccessData = async (req, res) => {
   // we need to encrypt our twitter client id and secret here in base 64 (stated in twitter documentation)
-  const BasicAuthToken = Buffer.from(
-    `${process.env.Twitter_ClientID}:${process.env.Twitter_Client_Secret}`,
-    "utf8"
-  ).toString("base64");
+  //   const url = 'https://api.twitter.com/2/me';
+  //   console.log("%%%%%",req.get("Authorization"));
+  // const headers = {
+  //   'Authorization': req.get("Authorization"),
+  // };
 
-  twitterOauthTokenParams = {
-    client_id: process.env.Twitter_ClientID,
-    // based on code_challenge
-    code_verifier: "8KxxO-RPl0bLSxX5AWwgdiFbMnry_VOKzFeIlVA7NoA",
-    redirect_uri: `http://www.localhost:3000`,
-    grant_type: "authorization_code",
-  };
-  const tokenParams = new URLSearchParams({
-    ...twitterOauthTokenParams,
-    code,
-  });
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Authorization: `Basic ${BasicAuthToken}`,
-  };
-  const requestOptions = {
-    method: "POST",
-    headers: headers,
-    body: tokenParams.toString(),
-  };
-
-  await fetch("https://api.twitter.com/2/oauth2/token", requestOptions)
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      console.log("------>", data);
-      return res.json(data);
+  if (req.get("Authorization")) {
+    const accessToken = req.get("Authorization");
+    console.log("_________",accessToken);
+    const userResponse = await fetch("https://api.twitter.com/2/users/me", {
+      headers: {
+        // "Content-type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
+    console.log("++++++++", userResponse);
+  }
+  // const userData = await userResponse.json();
+  // console.log("userData--------->", userData);
+
+  // twitterOauthTokenParams = {
+  //   client_id: process.env.Twitter_ClientID,
+  //   // based on code_challenge
+  //   code_verifier: "8KxxO-RPl0bLSxX5AWwgdiFbMnry_VOKzFeIlVA7NoA",
+  //   redirect_uri: `http://www.localhost:3000`,
+  //   grant_type: "authorization_code",
+  // };
+  // const tokenParams = new URLSearchParams({
+  //   ...twitterOauthTokenParams,
+  //   code,
+  // });
+  // const headers = {
+  //   "Content-Type": "application/x-www-form-urlencoded",
+  //   Authorization: `Basic ${BasicAuthToken}`,
+  // };
+  // const requestOptions = {
+  //   method: "POST",
+  //   headers: headers,
+  //   body: tokenParams.toString(),
+  // };
+
+  // await fetch("https://api.twitter.com/2/oauth2/token", requestOptions)
+  //   .then((res) => {
+  //     return res.json();
+  //   })
+  //   .then((data) => {
+  //     console.log("------>", data);
+  //     return res.json(data);
+  //   });
+  // fetch(url, {
+  //   method: "POST",
+  //   headers: headers
+  // })
+  //   .then((response) => response.json())
+  //   .then((data) => {
+  //     console.log("----->",data);
+  //   })
+  //   .catch((error) => {
+  //     console.error('Error:', error);
+  //   });
 };
 
 export const anc = async (req, res) => {};

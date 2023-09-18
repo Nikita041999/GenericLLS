@@ -76,7 +76,7 @@ const LoginPlayer = () => {
         console.log("*****", err);
       });
   }
-  async function googleUserData(){
+  async function googleUserData() {
     const token = "Bearer " + localStorage.getItem("accessToken");
     fetch("http://localhost:4000/getGoogleUserData", {
       method: "GET",
@@ -91,7 +91,11 @@ const LoginPlayer = () => {
       })
       .then((data) => {
         if (data.data != undefined) {
-          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          const value = {
+            email: data.data.email,
+            id: data.data.id,
+            name: data.data.name,
+          };
           localStorage.setItem("user", JSON.stringify(value));
           navigate(`/introduction`);
         } else {
@@ -103,7 +107,7 @@ const LoginPlayer = () => {
         console.log("*****", err);
       });
   }
-  async function facebookUserData(){
+  async function facebookUserData() {
     console.log("*****");
     const token = "Bearer " + localStorage.getItem("accessToken");
     fetch("http://localhost:4000/getFacebookUserData", {
@@ -119,7 +123,11 @@ const LoginPlayer = () => {
       })
       .then((data) => {
         if (data.data != undefined) {
-          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          const value = {
+            email: data.data.email,
+            id: data.data.id,
+            name: data.data.name,
+          };
           localStorage.setItem("user", JSON.stringify(value));
           navigate(`/introduction`);
         } else {
@@ -132,7 +140,7 @@ const LoginPlayer = () => {
       });
   }
 
-  async function linkedInUserData(){
+  async function linkedInUserData() {
     const token = "Bearer " + localStorage.getItem("accessToken");
     fetch("http://localhost:4000/getLinkedUserData", {
       method: "GET",
@@ -146,7 +154,11 @@ const LoginPlayer = () => {
       })
       .then((data) => {
         if (data.data != undefined) {
-          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          const value = {
+            email: data.data.email,
+            id: data.data.id,
+            name: data.data.name,
+          };
           localStorage.setItem("user", JSON.stringify(value));
           navigate(`/introduction`);
         } else {
@@ -158,7 +170,7 @@ const LoginPlayer = () => {
         console.log("*****", err);
       });
   }
-  async function twitterUserData(){
+  async function twitterUserData() {
     const token = "Bearer " + localStorage.getItem("accessToken");
     fetch("http://localhost:4000/getTwitterUserData", {
       method: "GET",
@@ -172,7 +184,11 @@ const LoginPlayer = () => {
       })
       .then((data) => {
         if (data.data != undefined) {
-          const value = { email: data.data.email, id: data.data.id, name: data.data.name };
+          const value = {
+            email: data.data.email,
+            id: data.data.id,
+            name: data.data.name,
+          };
           localStorage.setItem("user", JSON.stringify(value));
           navigate(`/introduction`);
         } else {
@@ -184,7 +200,7 @@ const LoginPlayer = () => {
         console.log("*****", err);
       });
   }
-  useEffect(() => { 
+  useEffect(() => {
     const token = JSON.parse(localStorage.getItem("user"));
     if (token) {
       navigate("/introduction");
@@ -199,12 +215,12 @@ const LoginPlayer = () => {
         setProvider("google");
       } else if (selectedProvider == "github") {
         setProvider("github");
-      }
-      else if (selectedProvider == "linkedin") {
+      } else if (selectedProvider == "linkedin") {
         setProvider("linkedin");
-      }else if (selectedProvider == "facebook") {
+      } else if (selectedProvider == "facebook") {
         setProvider("facebook");
-      }else if (selectedProvider == "twitter") {
+      } else if (selectedProvider == "twitter") {
+        console.log("twii");
         setProvider("twitter");
       }
     }
@@ -215,7 +231,7 @@ const LoginPlayer = () => {
     const urlParams = new URLSearchParams(queryString);
     const codeParam = urlParams.get("code");
     console.log("codeParam", codeParam);
-    console.log("------>",provider);
+    console.log("------>", provider, provider === "twitter");
     if (codeParam && localStorage.getItem("accessToken") === null) {
       async function getGithubAccessToken() {
         await fetch(
@@ -242,78 +258,90 @@ const LoginPlayer = () => {
           {
             method: "GET",
           }
-        )  .then((res) => {
-          return res.json();
-        })
+        )
+          .then((res) => {
+            return res.json();
+          })
           .then((data) => {
             if (data.access_token) {
               localStorage.setItem("accessToken", data.access_token);
-              googleUserData()
+              googleUserData();
             }
-          })
-          // .then((res) => {
-          //   googleUserData();
-          // });
+          });
+        // .then((res) => {
+        //   googleUserData();
+        // });
       }
-      async function getLinkedInAccessToken(){
+      async function getLinkedInAccessToken() {
         await fetch(
           "http://localhost:4000/getLinkedInAccessToken?code=" + codeParam,
           {
             method: "GET",
           }
-        )  .then((res) => {
-          return res.json();
-        })
+        )
+          .then((res) => {
+            return res.json();
+          })
           .then((data) => {
             if (data.access_token) {
               localStorage.setItem("accessToken", data.access_token);
-              linkedInUserData()
+              linkedInUserData();
             }
-          })
+          });
       }
-      async function getFacebookAccessToken(){
+      async function getFacebookAccessToken() {
         console.log("ffb");
         await fetch(
           "http://localhost:4000/getFacebookAccessToken?code=" + codeParam,
           {
             method: "GET",
           }
-        )  .then((res) => {
-          return res.json();
-        })
+        )
+          .then((res) => {
+            return res.json();
+          })
           .then((data) => {
             if (data.access_token) {
               localStorage.setItem("accessToken", data.access_token);
-              facebookUserData()
+              facebookUserData();
             }
-          })
+          });
       }
-      async function getTwitterAccessToken(){
+      async function getTwitterAccessToken() {
+        console.log("getTwitterAccessToken");
         await fetch(
           "http://localhost:4000/getTwitterAccessToken?code=" + codeParam,
           {
             method: "GET",
           }
-        )  .then((res) => {
-          return res.json();
-        })
+        )
+          .then((res) => {
+            console.log("333333333",res);
+            return res.json();
+          })
           .then((data) => {
             if (data.access_token) {
               localStorage.setItem("accessToken", data.access_token);
-              twitterUserData()
+              twitterUserData();
             }
-          })
+          });
       }
-      if (provider == "google") {
-        getGoogleAccessToken()
-      } else if (provider == "github") {
+      if (provider === "google") {
+        console.log(111);
+        getGoogleAccessToken();
+      } else if (provider === "github") {
+        console.log(1111);
         getGithubAccessToken();
-      }else if (provider == "linkedin") {
+      } else if (provider === "linkedin") {
+        console.log(11111);
         getLinkedInAccessToken();
-      }else if (provider == "facebook") {
-        console.log("provider",provider);
+      } else if (provider === "facebook") {
+        console.log(11111);
+        console.log("provider", provider);
         getFacebookAccessToken();
-      }else if (provider == "twitter") {
+      } else if (provider === "twitter") {
+        console.log(11111);
+        console.log("provider", provider);
         getTwitterAccessToken();
       }
     }
@@ -382,11 +410,11 @@ const LoginPlayer = () => {
       localStorage.setItem("provider", "google");
     } else if (text.toLowerCase().includes("github")) {
       localStorage.setItem("provider", "github");
-    }else if (text.toLowerCase().includes("linkedin")) {
+    } else if (text.toLowerCase().includes("linkedin")) {
       localStorage.setItem("provider", "linkedin");
-    }else if (text.toLowerCase().includes("facebook")) {
+    } else if (text.toLowerCase().includes("facebook")) {
       localStorage.setItem("provider", "facebook");
-    }else if (text.toLowerCase().includes("twitter")) {
+    } else if (text.toLowerCase().includes("twitter")) {
       localStorage.setItem("provider", "twitter");
     }
   };
@@ -421,22 +449,22 @@ const LoginPlayer = () => {
     const url = getLinkedInUrl();
     // const url = 'http://localhost:3000/auth/linkedin'
     window.location.assign(`${url}`);
-  }
-  
+  };
+
   const handleTwitterLogin = (e) => {
     e.preventDefault();
     handleProviderIdentity(e);
     const url = getTwitterUrl();
-    // const url = 'http://localhost:3000/auth/linkedin'
+    console.log("clicked twitter");
     window.location.assign(`${url}`);
-  }
+  };
   const handleFacebookLogin = (e) => {
     e.preventDefault();
     handleProviderIdentity(e);
     const url = getFacebookUrl();
     // const url = 'http://localhost:3000/auth/linkedin'
     window.location.assign(`${url}`);
-  }
+  };
   return (
     <div className={styles.loginPage}>
       <div className="top-hor-img">
