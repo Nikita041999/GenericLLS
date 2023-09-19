@@ -53,7 +53,19 @@ const QuizIntro = () => {
   }, []);
 
   useEffect(() => {
-    setName(token.firstname);
+    console.log("**********", token.login);
+    if (token.login) {
+      setName(token.login);
+    } else {
+      setName(token.firstname);
+    }
+    // const prov = JSON.parse(localStorage.getItem("provider"))
+    // console.log("pvrrrrrrr",prov);
+    // if (JSON.parse(localStorage.getItem("provider")) === "github") {
+    //   setName(token.login);
+    // } else {
+
+    // }
   }, [loading, token]);
 
   return loading ? (
@@ -74,7 +86,9 @@ const QuizIntro = () => {
     <div className={`${styles.introbg}`}>
       <div className={`${styles.container_fluid}`}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <h2 style={{ marginBottom: "0px" }}>Hello, {name}</h2>
+          <h2 style={{ marginBottom: "0px" }}>
+            Hello, {token.login ? token.login :token.name?token.name.split(" ")[0]: token.firstname}
+          </h2>
           <button className={styles.logout_btn} onClick={handleLogout}>
             logout
           </button>

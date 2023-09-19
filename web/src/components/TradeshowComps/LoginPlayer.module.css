@@ -224,7 +224,9 @@
 
 .text_end{
     display: flex;
-    justify-content: flex-end;
+    justify-content: end;
+    /* justify-content: flex-end; */
+    justify-content: space-between;
 }
 
 .loginformfields {
@@ -261,6 +263,13 @@ margin-top: 0 !important;
 
 .introbg .container_fluid {
   min-height: calc(100vh - 100px);
+}
+
+.back_to_login{
+  color: black
+}
+.back_to_login:hover {
+  color: #e60200;
 }
 
 @media screen and (max-width: 991px) {

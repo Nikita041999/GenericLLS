@@ -102,6 +102,7 @@ const ForgetPassword = () => {
             <div
               className={`mt-3 ${styles.text_end} mt-3`}
             >
+            <a style={{alignSelf:'end',fontWeight:500}} className={`${styles.back_to_login}`} href="/">Back to Login</a>
               <button className={`${styles.red_btn}`} type="submit" style={{marginRight:"1rem"}}>
                 {" "}
                 Submit{" "}

@@ -295,6 +295,7 @@ const SignupPlayer = () => {
                     Signup 
                     {/* <img src={WhiteArrow} />{" "} */}
                   </button>
+                  <a style={{alignSelf:'end',fontWeight:500}} className={`${styles.back_to_login}`} href="/">Back to Login</a>
                 </div>
               </div>
             </div>

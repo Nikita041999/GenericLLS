@@ -6,6 +6,8 @@ import {
   wordCorrection,
   passwordEncryption,
   generateUniqueToken,
+  downloadURLImage,
+  imageStorage,
 } from "../../utils/helper.js";
 
 export const loginRoute = async (req, res) => {
@@ -239,37 +241,50 @@ export const githubUserData = async (req, res) => {
       return res.json();
     })
     .then((data) => {
-      const insertUserWithoutEmail = `INSERT INTO players (social_id,avatar_url) VALUES (?,?)`;
+      // console.log("**********", data);
+      const insertUserWithoutEmail = `INSERT INTO players (social_id,avatar_url,username) VALUES (?,?,?)`;
       const insertUserWithEmail = `INSERT INTO players (social_id,email_address,avatar_url) VALUES (?,?,?)`;
-      const idExistQuery = `select * from players where social_id=?`;
+      const idExistQuery = `select * from players where social_id=? or username =?`;
       if (data.email === null) {
         con
-          .query(idExistQuery, [data.id])
+          .query(idExistQuery, [data.id, data.login])
           .then((data1) => {
-            if (data1[0].length == 0) {
-              con
-                .query(insertUserWithoutEmail, [data.id, data.avatar_url])
-                .then((val) => {
-                  return res.send({
-                    status: true,
-                    message: "User logged in.",
-                    data: data,
-                  });
-                });
-            } else {
-              return res.send({
-                status: true,
-                message: "User already exists.",
-                data: data,
-              });
-            }
+            console.log("****data.avatar_url****",data.avatar_url);
+            downloadURLImage(data.avatar_url)
+              // imageStorage.single(data.avatar_url)
+              console.log(1);
+            // if (data1[0].length == 0) {
+            //   console.log("****data.avatar_url****",data.avatar_url);
+            //   imageStorage.single(data.avatar_url)
+            //   console.log(1);
+            //   // downloadURLImage(data.avatar_url)
+            //   con
+            //     .query(insertUserWithoutEmail, [
+            //       data.id,
+            //       data.avatar_url,
+            //       data.login,
+            //     ])
+            //     .then((val) => {
+            //       return res.send({
+            //         status: true,
+            //         message: "User logged in.",
+            //         data: data,
+            //       });
+            //     });
+            // } else {
+            //   return res.send({
+            //     status: true,
+            //     message: "User already exists.",
+            //     data: data,
+            //   });
+            // }
           })
           .catch((err) => {
             return res.send({ status: false, message: err });
           });
       } else {
         con
-          .query(idExistQuery, [data.id])
+          .query(idExistQuery, [data.id, data.login])
           .then((data1) => {
             if (data1[0].length == 0) {
               con
@@ -363,7 +378,8 @@ export const googleUserData = async (req, res) => {
     .query(idExistQuery, [userData.id])
     .then((data1) => {
       if (data1[0].length == 0) {
-        console.log(0);
+        console.log("");
+        // downloadURLImage(userData.picture)
         con
           .query(insertUserWithEmail, [
             name[0],
@@ -551,7 +567,7 @@ export const twitterAccessData = async (req, res) => {
 
   if (req.get("Authorization")) {
     const accessToken = req.get("Authorization");
-    console.log("_________",accessToken);
+    console.log("_________", accessToken);
     const userResponse = await fetch("https://api.twitter.com/2/users/me", {
       headers: {
         // "Content-type": "application/json",
