@@ -142,6 +142,7 @@ const LoginPlayer = () => {
 
   async function linkedInUserData() {
     const token = "Bearer " + localStorage.getItem("accessToken");
+    console.log("********Token***",token)
     fetch("http://localhost:4000/getLinkedUserData", {
       method: "GET",
       headers: {
@@ -153,6 +154,7 @@ const LoginPlayer = () => {
         return res.json();
       })
       .then((data) => {
+        console.log("data*********",data)
         if (data.data != undefined) {
           const value = {
             email: data.data.email,
@@ -280,9 +282,11 @@ const LoginPlayer = () => {
           }
         )
           .then((res) => {
+           
             return res.json();
           })
           .then((data) => {
+            console.log("linkdinTokenResponse",data)
             if (data.access_token) {
               localStorage.setItem("accessToken", data.access_token);
               linkedInUserData();
@@ -421,7 +425,8 @@ const LoginPlayer = () => {
 
   const handleGoogleLogin = (e) => {
     e.preventDefault();
-    handleProviderIdentity(e);
+    localStorage.setItem("provider", "google");
+    // handleProviderIdentity(e);
     const url = getGoogleUrl();
     // console.log(url);
     window.location.assign(`${url}`);
@@ -429,7 +434,8 @@ const LoginPlayer = () => {
 
   const handleGithubLogin = (e) => {
     e.preventDefault();
-    handleProviderIdentity(e);
+    localStorage.setItem("provider", "github");
+    // handleProviderIdentity(e);
     const url = getGitHubUrl();
     // console.log(url);
     window.location.assign(`${url}`);
@@ -445,7 +451,8 @@ const LoginPlayer = () => {
   };
   const handleLinkedInLogin = (e) => {
     e.preventDefault();
-    handleProviderIdentity(e);
+    localStorage.setItem("provider", "linkedin");
+    // handleProviderIdentity(e);
     const url = getLinkedInUrl();
     // const url = 'http://localhost:3000/auth/linkedin'
     window.location.assign(`${url}`);
@@ -453,14 +460,18 @@ const LoginPlayer = () => {
 
   const handleTwitterLogin = (e) => {
     e.preventDefault();
-    handleProviderIdentity(e);
+    localStorage.setItem("provider", "twitter");
+    // handleProviderIdentity(e);
+
     const url = getTwitterUrl();
+    
     console.log("clicked twitter");
     window.location.assign(`${url}`);
   };
   const handleFacebookLogin = (e) => {
     e.preventDefault();
-    handleProviderIdentity(e);
+    localStorage.setItem("provider", "facebook");
+    // handleProviderIdentity(e);
     const url = getFacebookUrl();
     // const url = 'http://localhost:3000/auth/linkedin'
     window.location.assign(`${url}`);

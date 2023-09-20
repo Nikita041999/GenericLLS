@@ -8,13 +8,13 @@ import { UserContext } from "lib/contexts/userContext";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import {AdminContext} from 'lib/contexts/adminContext'
 import Loader from "components/Loader";
-import { login } from "lib/network/auth";
 import "../../src/assets/css/style.css";
 // import styles from "../../src/components/TradeshowComps/LoginPlayer.module.css";
 
 function Login() {
-  const userStore = useContext(UserContext);
+  const adminStore = useContext(AdminContext);
   const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function Login() {
     // console.log(values);
     // setShowError(false);
     setLoading(true);
-    userStore.userLogin(values).then((res) => {
+    adminStore.adminLogin(values).then((res) => {
       if (res.status) {
         // setLoading(false);
         navigate("/dashboard");

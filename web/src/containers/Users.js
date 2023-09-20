@@ -191,7 +191,6 @@ const playerData =()=>{
       toast("User Deleted Successfully", { type: "success" });
       getData({ page: data.currentPage });
     });
-
     handleToggleDeleteModal(false);
   };
 

@@ -11,7 +11,7 @@
       };
   
     const qs = new URLSearchParams(options);
-  
+  console.log("qs",qs)
     return `${rootURl}?${qs.toString()}`;
   }
   

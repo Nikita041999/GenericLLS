@@ -91,22 +91,18 @@ export function formatDate(date) {
 }
 
 export function downloadURLImage(imageUrl) {
-  // const imageUrl = "https://avatars.githubusercontent.com/u/108452468?v=4";
-  const now = new Date();
-  let imgCode = imageUrl.split("/");
-  imgCode = imgCode[imgCode.length - 1];
-  console.log("0", imgCode);
-
-  // Define the destination directory and filename for the downloaded image
   const destinationDir = "downloads";
-  const filename = `github_image.jpg`; // You can change the filename as needed
-
   if (!fs.existsSync(destinationDir)) {
-    fs.mkdirSync(destinationDir)
+    fs.mkdirSync(destinationDir);
   }
   // Function to download the image
-  async function downloadImage() {
+  async function downloadGithubImage() {
     try {
+      const now = new Date();
+      let imgCode = imageUrl.split("/");
+      imgCode = imgCode[imgCode.length - 1];
+      imgCode = imgCode.split("?")[0];
+      const filename = `github_image_${imgCode}_${now.getTime()}.jpg`;
       const response = await fetch(imageUrl);
 
       if (!response.ok) {
@@ -115,22 +111,48 @@ export function downloadURLImage(imageUrl) {
           `HTTP Error: ${response.status} ${response.statusText}`
         );
       }
-      // Get the image data as a Buffer
-      // const imageData = await response.buffer();
       const arrayBuffer = await response.arrayBuffer();
-      // Convert the ArrayBuffer to a Buffer
       const imageData = Buffer.from(arrayBuffer);
-    
       const imagePath = path.join(destinationDir, filename);
-    fs.writeFileSync(imagePath, imageData);
-      // fs.writeFileSync(imagePath, imageData);
-      
+      fs.writeFileSync(imagePath, imageData);
       console.log("Image downloaded successfully.");
+      return imagePath;
     } catch (error) {
       console.error("Error downloading image:", error.message);
     }
   }
-  downloadImage();
+  async function downloadGoogleImage() {
+    try {
+      const now = new Date();
+      console.log("*****",imageUrl);
+      let imgCode = imageUrl.split("/");
+      imgCode = imgCode[imgCode.length - 1];
+      imgCode = imgCode.split("=")[0];
+      const filename = `google_image_${imgCode}_${now.getTime()}.jpg`;
+      console.log("****fikename",filename);
+      const response = await fetch(imageUrl);
+
+      if (!response.ok) {
+        console.log("res not okay");
+        throw new Error(
+          `HTTP Error: ${response.status} ${response.statusText}`
+        );
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const imageData = Buffer.from(arrayBuffer);
+      const imagePath = path.join(destinationDir, filename);
+      fs.writeFileSync(imagePath, imageData);
+      console.log("Image downloaded successfully.");
+      return imagePath;
+    } catch (error) {
+      console.error("Error downloading image:", error.message);
+    }
+  }
+  if (imageUrl.includes("github")) {
+    return downloadGithubImage();
+  }else if (imageUrl.includes("google")) {
+    return downloadGoogleImage();
+  }
 }
 
 export function imageStorage() {

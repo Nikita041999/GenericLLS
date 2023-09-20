@@ -15,3 +15,14 @@ export function resetPassword(data) {
 export function changePassword(data) {
   return axiosClient.post("api/change-password", data);
 }
+
+export function adminlogin(data) {
+  return axiosClient.post("/admin/admin-login", data);
+}
+export function adminchangepassword(data) {
+  return axiosClient.post("/admin/change-password", data);
+}
+export function adminresetpassword(data) {
+  return axiosClient.post("/admin/forget-password", data);
+}
+

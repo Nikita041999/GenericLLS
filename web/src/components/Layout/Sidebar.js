@@ -10,7 +10,8 @@ export default function Sidebar({ toggleSidebar }) {
   const location = useLocation();
   const [menus, setMenus] = useState([
     // { name: "Dashboard", url: "/dashboard", icon: dashbordIcon },
-    { name: "Players", url: "", icon: userIcon },
+    { name: "Players", url: "/players", icon: userIcon },
+    { name: "Questions", url: "/dashboard", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
   const handleClick = (e) => {
@@ -19,11 +20,11 @@ export default function Sidebar({ toggleSidebar }) {
   const getMenus = () => {
     return menus.map((menu, index) => {
       let pathname = location.pathname.split("/")[1];
-      // console.log("pathname", pathname);
+      console.log("pathname", pathname);
       return (
         // <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>
         <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>
-          <a href={''} onClick={handleClick}>
+          <a href={menu.url}>
             <img src={menu.icon} alt="" /> {menu.name}
           </a>
         </li>
@@ -40,7 +41,7 @@ export default function Sidebar({ toggleSidebar }) {
         onClick={toggleSidebar}
       ></button>
       <div className={`text-center w-100`}>
-        <a href="/dashboard" className={`${styles.logo}`}>
+        <a href="" onClick={(e) => e.preventDefault()} className={`${styles.logo}`}>
           <img src={logo} alt="logo" />
         </a>
       </div>

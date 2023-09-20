@@ -3,6 +3,9 @@ import { getGoogleUrl } from "../../utils/getGoogleUrl";
 import { getGitHubUrl } from "../../utils/getGithubUrl";
 import GoogleLogo from "../../assets/images/google.svg";
 import GitHubLogo from "../../assets/images/github.svg";
+import TwitterLogo from "../../assets/images/twitter.svg"
+import FacebookLogo from "../../assets/images/facebook.svg"
+import LinkedInLogo from "../../assets/images/linkedin.svg"
 import styles from "./LoginPlayer.module.css";
 
 const GlobalLoginButtons = (propButtons) => {
@@ -16,7 +19,7 @@ const GlobalLoginButtons = (propButtons) => {
   return (
     <div className={styles.global_links}>
       <a
-        style={{ backgroundColor: "#3b5998" }}
+        // style={{ backgroundColor: "#3b5998" }}
         // href={getGoogleUrl()}
         href=""
         onClick={handleGoogleLogin}
@@ -30,10 +33,10 @@ const GlobalLoginButtons = (propButtons) => {
           alt=""
           style={{ height: "2rem" }}
         />
-        Continue with Google
+        {/* Continue with Google */}
       </a>
       <a
-        style={{ backgroundColor: "#55acee" }}
+        // style={{ backgroundColor: "#55acee" }}
         href=""
         // href={getGitHubUrl()}
         role="button"
@@ -47,10 +50,10 @@ const GlobalLoginButtons = (propButtons) => {
           alt=""
           style={{ height: "2.2rem" }}
         />
-        Continue with GitHub
+        {/* Continue with GitHub */}
       </a>
       <a
-        style={{ backgroundColor: "#3b5998" }}
+        // style={{ backgroundColor: "#3b5998" }}
         // href={getGoogleUrl()}
         href=""
         onClick={handleLinkedInLogin}
@@ -58,16 +61,16 @@ const GlobalLoginButtons = (propButtons) => {
         data-mdb-ripple="true"
         data-mdb-ripple-color="light"
       >
-        {/* <img
+        <img
           className="pr-2"
-          src={}
+          src={LinkedInLogo}
           alt=""
           style={{ height: "2rem" }}
-        /> */}
-        Continue with LinkedIn
+        />
+        {/* Continue with LinkedIn */}
       </a>
       <a
-        style={{ backgroundColor: "#3b5998" }}
+        // style={{ backgroundColor: "#3b5998" }}
         // href={getGoogleUrl()}
         href=""
         onClick={handleFacebookLogin}
@@ -75,16 +78,16 @@ const GlobalLoginButtons = (propButtons) => {
         data-mdb-ripple="true"
         data-mdb-ripple-color="light"
       >
-        {/* <img
+        <img
           className="pr-2"
-          src={}
+          src={FacebookLogo}
           alt=""
           style={{ height: "2rem" }}
-        /> */}
-        Continue with Facebook
+        />
+        {/* Continue with Facebook */}
       </a>
       <a
-        style={{ backgroundColor: "#3b5998" }}
+        // style={{ backgroundColor: "#3b5998" }}
         // href={getGoogleUrl()}
         href=""
         onClick={handleTwitterLogin}
@@ -92,13 +95,13 @@ const GlobalLoginButtons = (propButtons) => {
         data-mdb-ripple="true"
         data-mdb-ripple-color="light"
       >
-        {/* <img
+        <img
           className="pr-2"
-          src={}
+          src={TwitterLogo}
           alt=""
           style={{ height: "2rem" }}
-        /> */}
-        Continue with Twitter
+        />
+        {/* Continue with Twitter */}
       </a>
     </div>
   );

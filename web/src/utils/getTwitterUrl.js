@@ -3,6 +3,7 @@ export const getTwitterUrl = () => {
     const rootURl = "https://twitter.com/i/oauth2/authorize";
 
     const options = {
+        // client_id: 'a3ZMelYNJwtvKUQepFIo8x2xB',
         client_id: 'QkZMQXVNXzAxWlcyZ21WU0daZGo6MTpjaQ',
         redirect_uri: "http://localhost:3000",
         // scope: 'email,user_gender, user_birthday', // Request profile 

@@ -9,6 +9,7 @@ import {
   downloadURLImage,
   imageStorage,
 } from "../../utils/helper.js";
+import CryptoJS from "crypto-js";
 
 export const loginRoute = async (req, res) => {
   let { email, password } = req.body;
@@ -248,36 +249,25 @@ export const githubUserData = async (req, res) => {
       if (data.email === null) {
         con
           .query(idExistQuery, [data.id, data.login])
-          .then((data1) => {
-            console.log("****data.avatar_url****",data.avatar_url);
-            downloadURLImage(data.avatar_url)
-              // imageStorage.single(data.avatar_url)
-              console.log(1);
-            // if (data1[0].length == 0) {
-            //   console.log("****data.avatar_url****",data.avatar_url);
-            //   imageStorage.single(data.avatar_url)
-            //   console.log(1);
-            //   // downloadURLImage(data.avatar_url)
-            //   con
-            //     .query(insertUserWithoutEmail, [
-            //       data.id,
-            //       data.avatar_url,
-            //       data.login,
-            //     ])
-            //     .then((val) => {
-            //       return res.send({
-            //         status: true,
-            //         message: "User logged in.",
-            //         data: data,
-            //       });
-            //     });
-            // } else {
-            //   return res.send({
-            //     status: true,
-            //     message: "User already exists.",
-            //     data: data,
-            //   });
-            // }
+          .then(async (data1) => {
+            if (data1[0].length == 0) {
+              const imgpath = await downloadURLImage(data.avatar_url);
+              con
+                .query(insertUserWithoutEmail, [data.id, imgpath, data.login])
+                .then((val) => {
+                  return res.send({
+                    status: true,
+                    message: "User logged in.",
+                    data: data,
+                  });
+                });
+            } else {
+              return res.send({
+                status: true,
+                message: "User already exists.",
+                data: data,
+              });
+            }
           })
           .catch((err) => {
             return res.send({ status: false, message: err });
@@ -369,24 +359,21 @@ export const googleUserData = async (req, res) => {
     }
   );
   const userData = await userResponse.json();
-  console.log("userData", userData);
   const name = userData.name.split(" ");
-  console.log(name);
   const insertUserWithEmail = `INSERT INTO players (firstname,lastname,social_id,email_address,avatar_url) VALUES (?,?,?,?,?)`;
   const idExistQuery = `select * from players where social_id=?`;
   con
     .query(idExistQuery, [userData.id])
-    .then((data1) => {
+    .then(async (data1) => {
       if (data1[0].length == 0) {
-        console.log("");
-        // downloadURLImage(userData.picture)
+        const imagePath = await downloadURLImage(userData.picture);
         con
           .query(insertUserWithEmail, [
             name[0],
             name[1],
             userData.id,
             userData.email,
-            userData.picture,
+            imagePath,
           ])
           .then((val) => {
             console.log("data.....", userData);
@@ -558,67 +545,137 @@ export const twitterAccessToken = async (req, res) => {
 };
 
 export const twitterAccessData = async (req, res) => {
-  // we need to encrypt our twitter client id and secret here in base 64 (stated in twitter documentation)
-  //   const url = 'https://api.twitter.com/2/me';
-  //   console.log("%%%%%",req.get("Authorization"));
-  // const headers = {
-  //   'Authorization': req.get("Authorization"),
-  // };
+  try {
+    if (req.get("Authorization")) {
+      const accessToken = req.get("Authorization").replace("Bearer ", ""); // Remove "Bearer " prefix
+      // console.log("Access Token:", accessToken);
+      let con = await getConnection();
+      const userResponse = await fetch("https://api.twitter.com/2/users/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-  if (req.get("Authorization")) {
-    const accessToken = req.get("Authorization");
-    console.log("_________", accessToken);
-    const userResponse = await fetch("https://api.twitter.com/2/users/me", {
-      headers: {
-        // "Content-type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    console.log("++++++++", userResponse);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        // Handle the user data as needed
+        const { data } = userData;
+        const insertUserWithEmail = `INSERT INTO players (firstname,lastname,social_id,username) VALUES (?,?,?,?)`;
+        const idExistQuery = `select * from players where social_id=? or username=?`;
+        console.log("userdata", data);
+        con
+
+          .query(idExistQuery, [data.id, data.username])
+          .then(async (data1) => {
+            if (data1[0].length == 0) {
+              const name = data.name.split(" ");
+              con
+                .query(insertUserWithEmail, [
+                  name[0],
+                  name[1],
+                  data.id,
+                  data.username,
+                ])
+                .then((val) => {
+                  console.log("data.....", data);
+                  return res.send({
+                    status: true,
+                    message: "User logged in.",
+                    data: data,
+                  });
+                });
+            } else {
+              return res.send({
+                status: true,
+                message: "User already exists.",
+                data: data,
+              });
+            }
+          })
+          .catch((err) => {
+            return res.send({ status: false, message: err });
+          });
+      } else {
+        console.error("Error from Twitter API:", userResponse.statusText);
+        res
+          .status(userResponse.status)
+          .json({ error: "Unable to fetch Twitter data" });
+      }
+    } else {
+      res.status(401).json({ error: "Authorization token not provided" });
+    }
+  } catch (error) {
+    console.error("Error while fetching Twitter data:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
-  // const userData = await userResponse.json();
-  // console.log("userData--------->", userData);
-
-  // twitterOauthTokenParams = {
-  //   client_id: process.env.Twitter_ClientID,
-  //   // based on code_challenge
-  //   code_verifier: "8KxxO-RPl0bLSxX5AWwgdiFbMnry_VOKzFeIlVA7NoA",
-  //   redirect_uri: `http://www.localhost:3000`,
-  //   grant_type: "authorization_code",
-  // };
-  // const tokenParams = new URLSearchParams({
-  //   ...twitterOauthTokenParams,
-  //   code,
-  // });
-  // const headers = {
-  //   "Content-Type": "application/x-www-form-urlencoded",
-  //   Authorization: `Basic ${BasicAuthToken}`,
-  // };
-  // const requestOptions = {
-  //   method: "POST",
-  //   headers: headers,
-  //   body: tokenParams.toString(),
-  // };
-
-  // await fetch("https://api.twitter.com/2/oauth2/token", requestOptions)
-  //   .then((res) => {
-  //     return res.json();
-  //   })
-  //   .then((data) => {
-  //     console.log("------>", data);
-  //     return res.json(data);
-  //   });
-  // fetch(url, {
-  //   method: "POST",
-  //   headers: headers
-  // })
-  //   .then((response) => response.json())
-  //   .then((data) => {
-  //     console.log("----->",data);
-  //   })
-  //   .catch((error) => {
-  //     console.error('Error:', error);
-  //   });
 };
+
+
+export const login = async (req,res) => {
+  let { email, password } = req.body;
+  password = CryptoJS.SHA512(password, process.env.EncryptionKEY).toString();
+  // console.log("newPassword**********", email, password);
+  if ((email, password)) {
+    // console.log(email, password);
+    const query = `select * from employees where email_address=? and password=?`;
+
+    const con = await getConnection();
+
+    con.connect((err) => {
+      if (err) {
+        console.log("Error!::)", err);
+        throw err;
+      } else {
+        console.log("Db connected!");
+      }
+    });
+
+    con
+      .query(query, [email, password])
+      .then(
+        (data) => {
+          if (data[0].length >= 1) {
+            const token = generateJWT(email);
+            res.status(200).send({
+              data: data[0],
+              token,
+              message: "Admin login successfully.",
+              status: true,
+            });
+          } else {
+            res.status(401).send({
+              data: [],
+              message: "User not found.",
+              status: false,
+            });
+          }
+        },
+        (error) => {
+          res.send({
+            data: [],
+            message: "The Email address or Password you entered doesn't match.",
+            status: false,
+            error: error,
+          });
+        }
+      )
+      .catch((err) => {
+        res.send({
+          data: [],
+          message: "Some error occur:",
+          status: false,
+          error: err,
+        });
+      }).then( () => con.end());
+
+      
+  } else {
+    res.send({
+      data: [],
+      message: "EmailId or password is required",
+      status: false,
+    });
+  }
+}
 
 export const anc = async (req, res) => {};

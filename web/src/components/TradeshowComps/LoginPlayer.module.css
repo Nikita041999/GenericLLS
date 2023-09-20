@@ -239,8 +239,8 @@
 
 .global_links{
   display: flex;
-  flex-direction: column;
   margin-top: 2rem;
+  justify-content: center;
 }
 
 .global_links a:nth-child(1){
