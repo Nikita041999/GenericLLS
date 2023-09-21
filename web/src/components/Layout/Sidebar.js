@@ -11,7 +11,8 @@ export default function Sidebar({ toggleSidebar }) {
   const [menus, setMenus] = useState([
     // { name: "Dashboard", url: "/dashboard", icon: dashbordIcon },
     { name: "Players", url: "/players", icon: userIcon },
-    { name: "Questions", url: "/dashboard", icon: userIcon },
+    { name: "Add Question", url: "/dashboard", icon: userIcon },
+    { name: "Questions", url: "/quiz-list", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
   const handleClick = (e) => {

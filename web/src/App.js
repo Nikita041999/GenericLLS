@@ -31,6 +31,7 @@ import AdminUnProtextedRoute from "Routes/AdminUnProtextedRoute";
 import { AdminProtectedRoute } from "Routes/AdminProtectedRoute";
 import AddQuestion from "components/TradeshowComps/AddQuestion";
 import Dashboard from "containers/Dashboard";
+import QuestionList from "containers/QuestionList";
 // import { GoogleLoginButton } from "react-social-login-buttons";
 
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
@@ -114,6 +115,15 @@ function App() {
                   </AdminProtectedRoute>
                 }
               />
+              <Route
+                path="/quiz-list"
+                element={
+                  <AdminProtectedRoute>
+                    <QuestionList />
+                  </AdminProtectedRoute>
+                }
+              />
+
               <Route
                 path="/signup"
                 element={

@@ -1,29 +1,25 @@
 import Layout from "components/Layout";
 import userSvg from "assets/images/users.svg";
 import eventSvg from "assets/images/events.svg";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getDashboard } from "lib/network/apis";
 import Loader from "components/Loader";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import styles from "./Users.module.css";
 import TextField from "components/InputFields/TextField";
+import { AdminContext } from "lib/contexts/adminContext";
+import { quizDataAdd } from "lib/network/loginauth";
 export default function Dashboard() {
   const [data, setData] = useState({});
   const [isLoading, setLoading] = useState(false);
-  const [option, setOptions] = useState(0);
+  const [option, setOptions] = useState(null);
   useEffect(() => {
     console.log("options******", option);
   }, [option]);
   useEffect(() => {
     setLoading(true);
     console.log("isLoading>>>>", isLoading);
-    // getDashboard()
-    //   .then((dashboardRes) => {
-    //    setData(dashboardRes.data.data[0]);
-    //     setLoading(false);
-    //   })
-    //   .catch((er) => console.log("er", er));
   }, []);
 
   let initialValues = {
@@ -37,20 +33,18 @@ export default function Dashboard() {
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema: Yup.object(validationSchema),
-    onSubmit: async (values) => {
+    onSubmit: async (values, { resetForm }) => {
+      console.log(1);
       // setShowError(false);
       // setLoading(true);
-      console.log("***************** inside login fn 2", values);
-
-      // userStore.userLogin(values).then((res) => {
-      //   if (res.status) {
-      //     setLoading(false);
-      //     navigate("/dashboard");
-      //   } else {
-      //     setShowError(res.error);
-      //     setLoading(false);
-      //   }
-      // });
+      quizDataAdd(values)
+        .then((data) => {
+          console.log("data------>", data);
+          setOptions(null)
+          resetForm();
+        })
+        .catch((err) => console.log(err));
+      // console.log("***************** inside login fn 2", values);
     },
   });
 
@@ -60,11 +54,12 @@ export default function Dashboard() {
       arr.push(
         <div className="col-md-12">
           <TextField
-            name="option"
+            name={`option${i + 1}`}
             showIcon={false}
-            placeholder="option"
+            placeholder={`option${i + 1}`}
             formik={formik}
             // onBlur={formik.handleBlur}
+            label={`option${i + 1}`}
           />
         </div>
       );
@@ -91,19 +86,6 @@ export default function Dashboard() {
                   </div>
                 ) : ( */}
                 <div className="row mt-4">
-                  <div className="col-md-12 col-lg-6 col-xl-4">
-                    <a href="/users">
-                      <div className="card_dash mb-3">
-                        <div className="cardinfo">
-                          <label>Total Quizes Conducted</label>
-                          <strong>{/* {data.present_players} */}</strong>
-                        </div>
-                        <div className="cardIcon">
-                          <img src={userSvg} alt="icon" />
-                        </div>
-                      </div>
-                    </a>
-                  </div>
                   <div>
                     <form onSubmit={formik.handleSubmit}>
                       <div className="row g-3">
@@ -114,6 +96,7 @@ export default function Dashboard() {
                             // icon={"emailSvg"}
                             placeholder="Enter your question here"
                             formik={formik}
+                            label={"Question"}
                           />
                         </div>
                         <div className="col-md-3">
@@ -124,6 +107,7 @@ export default function Dashboard() {
                             name="opt_number"
                             className={"form-control col-md-3"}
                             type="number"
+                            value={option}
                             onChange={(e) => setOptions(e.target.value)}
                           />
                         </div>
@@ -131,10 +115,11 @@ export default function Dashboard() {
                         {option > 0 && (
                           <div className="col-md-12">
                             <TextField
-                              name="password"
+                              name="answer"
                               showIcon={false}
-                              placeholder="Answer"
+                              placeholder="answer"
                               formik={formik}
+                              label={"Right Option"}
                               // onBlur={formik.handleBlur}
                             />
                           </div>

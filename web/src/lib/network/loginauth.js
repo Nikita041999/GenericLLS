@@ -17,6 +17,7 @@ export function changePassword(data) {
 }
 
 export function adminlogin(data) {
+  console.log(1,data);
   return axiosClient.post("/admin/admin-login", data);
 }
 export function adminchangepassword(data) {
@@ -24,5 +25,12 @@ export function adminchangepassword(data) {
 }
 export function adminresetpassword(data) {
   return axiosClient.post("/admin/forget-password", data);
+}
+export function quizDataAdd(data) {
+  return axiosClient.post("/admin/quiz-data-add", data);
+}
+
+export function quizQuestionList() {
+  return axiosClient.get("/admin/quiz-list");
 }
 

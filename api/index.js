@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user/user.js";
+// import adminRoutes from "./routes/admin/admin.js"
 import cors from 'cors'
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
 //-------------- jwt Middleware -------------------
 
 // Use the login and logout routes
+// app.use('/admin',adminRoutes);
 app.use('/',userRoutes);
 
 //getUserData
