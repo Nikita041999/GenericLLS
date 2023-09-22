@@ -251,7 +251,7 @@ const playerData =()=>{
         <div className={styles.content}>
           <div className={`${styles.dashboardData} row`}>
             <div className="col-md-4 col-lg-4 col-xl-4">
-              <div>
+              <a href=''>
                 <div className={`mb-3 ${styles.card_dash}`}>
                   <div className={styles.cardinfo}>
                     <label>Total Quizes Conducted</label>
@@ -261,7 +261,29 @@ const playerData =()=>{
                     <img src={userSvg} alt="icon" />
                   </div>
                 </div>
-              </div>
+              </a>
+              <a href='/dashboard' style={{marginLeft:'1rem'}}>
+                <div className={`mb-3 ${styles.card_dash}`}>
+                  <div className={styles.cardinfo}>
+                    <label>Add Questions</label>
+                    <strong>{20}</strong>
+                  </div>
+                  <div className={styles.cardIcon}>
+                    <img src={userSvg} alt="icon" />
+                  </div>
+                </div>
+              </a>
+              <a href='/quiz-list' style={{marginLeft:'1rem'}}>
+                <div className={`mb-3 ${styles.card_dash}`}>
+                  <div className={styles.cardinfo}>
+                    <label>Questionnaire</label>
+                    <strong>{20}</strong>
+                  </div>
+                  <div className={styles.cardIcon}>
+                    <img src={userSvg} alt="icon" />
+                  </div>
+                </div>
+              </a>
             </div>
 
             <div className="col-md-12">

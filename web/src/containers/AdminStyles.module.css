@@ -1,4 +1,40 @@
-.question_submit{
-    display: flex;
-    justify-content: center;
+.question_submit {
+  display: flex;
+  justify-content: center;
 }
+
+.button_wrapper > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button_wrapper > div button {
+  margin-left: 0.5rem;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+.question_warpper {
+  /* background: #ffffff;
+    margin:0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    box-shadow: 0px 10px 5px #e9e6e6, 0px -10px 5px #e9e6e6; */
+}
+.question_warpper div {
+  /* display: flex;
+    justify-content: space-between; */
+}
+.list_wrapper {
+  background: "#F5F5F5";
+}
+.list_wrapper > div {
+  display: flex;
+  width: 100%;
+}
+
+.li_wrapper ul li {
+  background: "#fff";
+}
+
+

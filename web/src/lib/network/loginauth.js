@@ -34,3 +34,6 @@ export function quizQuestionList() {
   return axiosClient.get("/admin/quiz-list");
 }
 
+export function editQuizData(){
+  return axiosClient.post("/admin/edit-quiz-list")
+}

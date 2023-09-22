@@ -82,7 +82,8 @@ export const quizDataAdd = async (req, res) => {
   answer = answer.trim();
   let con = await getConnection();
   const qddQuestionQuery = "insert into questions (questions) values(?)";
-  const optinIdQuery = "select * from question_options where question_id=? and options=?";
+  const optinIdQuery =
+    "select * from question_options where question_id=? and options=?";
   const addOptionQuery =
     "insert into question_options (question_id,options) values (?,?)";
   const addOptionAnswerQuery =
@@ -103,20 +104,37 @@ export const quizDataAdd = async (req, res) => {
           ]);
         }
       });
-      con.query(optinIdQuery, [q_id[0][0].question_id,answer]).then(async (val) => {
-        console.log("val******", val[0][0].option_id);
-        con.query(addOptionAnswerQuery, [q_id[0][0].question_id, val[0][0].option_id]).then(() => res.send({message:"Data inserted successfully"}));
-      });
+      con
+        .query(optinIdQuery, [q_id[0][0].question_id, answer])
+        .then(async (val) => {
+          console.log("val******", val[0][0].option_id);
+          con
+            .query(addOptionAnswerQuery, [
+              q_id[0][0].question_id,
+              val[0][0].option_id,
+            ])
+            .then(() => res.send({ message: "Data inserted successfully" }));
+        });
     })
     .catch((err) => res.send({ err: err }));
 };
 
-export const quizList = async(req,res) => {
-  const con = await getConnection()
-  const getQuizListQuery = "select * from questions"
-  con.query(getQuizListQuery,[]).then(data => {
-    if(data.length>0){
-      res.status(200).send({data:data[0],status:true,message:"All question List"})
+export const quizList = async (req, res) => {
+  const con = await getConnection();
+  console.log(">>>>body", req.body, Object.keys(req.body).length);
+  const getQuizListQuery = "select * from questions";
+  con.query(getQuizListQuery, []).then((data) => {
+    if (data.length > 0) {
+      res
+        .status(200)
+        .send({ data: data[0], status: true, message: "All question List" });
     }
-  })
-}
+  });
+};
+
+export const editQuizList = (req, res) => {
+  const { type, questions, order_id } = req.body;
+  const getQuestionQuery =
+    "select * from questions where type=? and questions=?";
+  con.query(getQuestionQuery, []);
+};
