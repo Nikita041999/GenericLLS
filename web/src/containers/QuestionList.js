@@ -29,8 +29,6 @@ const QuestionList = () => {
     // editQuizDat
     const tbl_row = document.getElementById(`table_row_${tableId}`);
     console.log('---->',tbl_row.getElementsByTagName('td')[2].textContent)
-
-    // console.log("****a ",a);
     setIsEditable(!isEditable);
     setTypeValue();
   };

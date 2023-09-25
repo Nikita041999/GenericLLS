@@ -11,118 +11,230 @@ import TextField from "components/InputFields/TextField";
 import { AdminContext } from "lib/contexts/adminContext";
 import { quizDataAdd } from "lib/network/loginauth";
 import addIcon from "assets/images/add_icon.svg";
-import { ImBin } from "react-icons/im";
+import { GrSubtractCircle } from "react-icons/gr";
 export default function Dashboard() {
+  const initialValues1 = {
+    question: "",
+    selectField: "",
+    optionA: "",
+    optionB: "",
+  };
+  const validationSchema1 = {
+    question: Yup.string().required("Please enter question"),
+    selectField: Yup.string().required("Please enter answer"),
+    optionA: Yup.string().required("Please enter option A"),
+    optionB: Yup.string().required("Please enter option B"),
+  };
   const [data, setData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [option, setOptions] = useState(null);
   const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
   const [selectedOption, setSelectedOption] = useState("");
-  const arr = [];
+  const [deleteOptionId, setDeleteOptionId] = useState("");
+  const [initialValues, setInitialValues] = useState(initialValues1);
+  const [buttonType,setButtonType] = useState('')
+  const [validationSchema, setValidationSchema] = useState(validationSchema1);
   useEffect(() => {
-    console.log("options******", option);
+    // console.log("options******", option);
   }, [option]);
   useEffect(() => {
-    setLoading(true);
-    console.log("isLoading>>>>", isLoading);
+    // setLoading(true);
+    // console.log("isLoading>>>>", isLoading);
   }, []);
 
-  let initialValues = {
-    question: "",
-    answer: "",
-    optionA: "",
-    optionB: "",
-  };
-  let validationSchema = {
-    question: Yup.string().required("Please enter question"),
-    answer: Yup.string().required("Please enter answer"),
-    optionA: Yup.string().required("Please enter option A"),
-    optionB: Yup.string().required("Please enter option B"),
-  };
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema: Yup.object(validationSchema),
-    onSubmit: async (values, { resetForm }) => {
-      console.log(1);
+    onSubmit: (values, { resetForm }) => {
       // setShowError(false);
       // setLoading(true);
       console.log(values);
-      // quizDataAdd(values)
-      //   .then((data) => {
-      //     console.log("data------>", data);
-      //     setOptions(null);
-      //     resetForm();
-      //   })
-      //   .catch((err) => console.log(err));
-      // console.log("***************** inside login fn 2", values);
+      quizDataAdd(values)
+        .then((data) => {
+          console.log("data------>", data);
+          setOptions(null);
+          resetForm();
+        })
+        .catch((err) => console.log(err));
+      console.log("***************** inside login fn 2", values);
     },
   });
 
-  // const handleOptionNumber = (count) => {
-  //   let arr = [];
-  //   for (let i = 0; i < count; i++) {
-  //     arr.push(
-  //       <div className="col-md-12">
-  //         <TextField
-  //           name={`option${i + 1}`}
-  //           showIcon={false}
-  //           placeholder={`option${i + 1}`}
-  //           formik={formik}
-  //           // onBlur={formik.handleBlur}
-  //           label={`option${i + 1}`}
-  //         />
-  //       </div>
-  //     );
-
-  //     initialValues[`option${i + 1}`] = "";
-  //     validationSchema[`option${i + 1}`] = Yup.string().required(
-  //       `Please enter option ${i + 1}`
-  //     );
-  //   }
-  //   return arr;
-  // };
   const handleOptionNumber = () => {
-    let capital = true;
-    // let arr = [];
-    console.log(1);
+    setButtonType('add')
     const charCode = prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
-    console.log("charCode****", charCode);
-    // console.log(String.fromCharCode(charCode+1));
+    // console.log("charCode****", charCode);
     const currentAlphabet = String.fromCharCode(charCode + 1);
     setOptionAlphabet((prev) => [...prev, currentAlphabet]);
-    console.log("dgjdsig", initialValues);
-    // arr.push(
-    //   <div className="col-md-12">
-    //     <TextField
-    //       name={`option${currentAlphabet}`}
-    //       showIcon={false}
-    //       placeholder={`option`}
-    //       formik={formik}
-    //       // onBlur={formik.handleBlur}
-    //       label={`option${currentAlphabet}`}
-    //     />
-    //   </div>
-    // );
-    // initialValues[`option${currentAlphabet}`] = "";
-    // validationSchema[`option${currentAlphabet}`] = Yup.string().required(
-    //   `Please enter option ${currentAlphabet}`
-    // );
+    // console.log("dgjdsig", initialValues);
 
-    // return arr;
-  };
-
-  // Event handler to handle changes in the selected value
-  const handleSelectChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
-  useEffect(() => {
-    initialValues[`option${prevOptAlphabet[prevOptAlphabet.length - 1]}`] = "";
-    validationSchema[`option${prevOptAlphabet[prevOptAlphabet.length - 1]},`] =
-      Yup.string().required(
+    const updatedInitialValues = {
+      ...initialValues, // Spread the existing state
+      [`option${currentAlphabet}`]: "", // Add the new key-value pair
+    };
+    setInitialValues(updatedInitialValues);
+    const updatedValidationSchema = {
+      ...validationSchema,
+      [`option${currentAlphabet}`]: Yup.string().required(
         `Please enter option ${prevOptAlphabet[prevOptAlphabet.length - 1]},`
-      );
-    console.log("***initialValues**8 ", initialValues);
-  }, [prevOptAlphabet]);
+      ),
+    };
+    setValidationSchema(updatedValidationSchema);
+  };
+
+  const handleDeleteOption = (alphabet) => {
+    console.log("*****", alphabet);
+    setButtonType('delete')
+    // const updatedOptionArray = prevOptAlphabet;
+    setDeleteOptionId(alphabet);
+    // const lastAlphabet =
+    //       prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
+    // setDeleteOptionId(e.target.id) ;
+    // let updatedOptionArray = prevOptAlphabet;
+    const updatedOptionArray = prevOptAlphabet.filter(
+      (element, index) => element != alphabet
+    );
+    console.log(">>>>>>>updatedOptionArray", updatedOptionArray);
+    // const lastAlphabet = updatedOptionArray.pop();
+    const lastAlphabet = prevOptAlphabet[prevOptAlphabet.length - 1];
+    // updatedOptionArray.pop();
+    console.log("-----updated array", updatedOptionArray, alphabet);
+    setOptionAlphabet((prev) => [...updatedOptionArray]);
+    const charCode = alphabet.charCodeAt(0);
+    const currentAlphabet = String.fromCharCode(charCode + 1);
+    const tempInitialVals = {};
+    const tempValidationVals = {};
+
+    // Object.entries(initialValues).map((opt, index) => {
+    //   if (opt[0].includes("option") && opt[0][opt[0].length - 1] == alphabet) {
+    //     for (
+    //       let i = 0;
+    //       i < lastAlphabet.charCodeAt(0) - currentAlphabet.charCodeAt(0);
+    //       i++
+    //     ) {
+    //       tempInitialVals[`option${currentAlphabet}`] =
+    //         initialValues[`option${currentAlphabet}`];
+    //     }
+    //   }
+    // });
+    const updatedInitialValues = initialValues;
+    const updatedValidationSchema = validationSchema;
+    delete updatedInitialValues[`option${lastAlphabet}`];
+    delete updatedValidationSchema[`option${lastAlphabet}`];
+    setInitialValues(updatedInitialValues);
+    setValidationSchema(updatedValidationSchema);
+
+    // const updatedInitialValues = {
+    //   ...initialValues,
+    //   [`option${currentAlphabet}`]: "",
+    // };
+    // setInitialValues(updatedInitialValues);
+    // const updatedValidationSchema = {
+    //   ...validationSchema,
+    //   [`option${currentAlphabet}`]: Yup.string().required(
+    //     `Please enter option ${prevOptAlphabet[prevOptAlphabet.length - 1]},`
+    //   ),
+    // };
+    // setValidationSchema(updatedValidationSchema);
+  };
+
+  const handleAddOptionButtonCLick = () => {
+  
+    return prevOptAlphabet.map((alphabet, index) => {
+      console.log("**alphabet**", alphabet);
+      if (index > 1) {
+        return (
+          <div
+            className={`col-md-12 ${styles.list_box_wrapper}`}
+            id={`remove_${alphabet}`}
+          >
+            <span onClick={() => handleDeleteOption(alphabet)}>
+              <GrSubtractCircle />
+            </span>
+            <TextField
+              name={`option${alphabet}`}
+              showIcon={false}
+              placeholder={`option`}
+              formik={formik}
+              // onBlur={formik.handleBlur}
+              label={`${alphabet}`}
+            />
+          </div>
+        );
+      }
+    });
+  };
+  const handleDeleteOptionButtonCLick = () => {
+    let charCode = deleteOptionId.charCodeAt(0);
+    console.log("**charCode**", charCode);
+    // const currentAlphabet = String.fromCharCode(charCode + 1);
+    return prevOptAlphabet.map((alphabet, index) => {
+      let alphaCharCode = alphabet.charCodeAt(0);
+      console.log("**alphabet**", alphabet, alphaCharCode);
+      if (index > 1) {
+        // console.log(">>>>>charCode<alphaCharCode", charCode < alphaCharCode);
+        if (charCode > alphaCharCode) {
+          return (
+            <div
+              className={`col-md-12 ${styles.list_box_wrapper}`}
+              id={`remove_${alphabet}`}
+            >
+              <span onClick={() => handleDeleteOption(alphabet)}>
+                <GrSubtractCircle />
+              </span>
+              <TextField
+                name={`option${alphabet}`}
+                showIcon={false}
+                placeholder={`option`}
+                formik={formik}
+                // onBlur={formik.handleBlur}
+                label={`${alphabet}`}
+              />
+            </div>
+          );
+        } else if(charCode <= alphaCharCode) {
+          const x = alphabet.charCodeAt(0);
+          console.log("x", x, x - 1);
+          const currentAlphabet = String.fromCharCode(x - 1);
+          console.log("currentAlphabet", currentAlphabet);
+          return (
+            <div
+              className={`col-md-12 ${styles.list_box_wrapper}`}
+              id={`remove_${currentAlphabet}`}
+            >
+              <span onClick={() => handleDeleteOption(currentAlphabet)}>
+                <GrSubtractCircle id='subtract' />
+              </span>
+              <TextField
+                name={`option${currentAlphabet}`}
+                showIcon={false}
+                placeholder={`option`}
+                formik={formik}
+                // onBlur={formik.handleBlur}
+                label={`${currentAlphabet}`}
+              />
+            </div>
+          );
+        }
+      }
+    });
+  };
+  // useEffect(() => {
+
+  // },[deleteOptionId])
+  // useEffect(() => {
+  //   handleDeleteOptionButtonCLick(deleteOptionId);
+  // }, [deleteOptionId]);
+  useEffect(() => {
+    console.log("***initialValues**", prevOptAlphabet);
+    console.log(">>>initialValues>>", initialValues);
+    console.log(")))))))validationSchema>>>>>>>>", validationSchema);
+    console.log("buttonType---->",buttonType);
+    // handleAddOptionButtonCLick();
+    if(buttonType == 'delete'){
+      handleDeleteOptionButtonCLick()
+    }
+  }, [prevOptAlphabet, initialValues, validationSchema,buttonType,deleteOptionId]);
   return (
     <Layout>
       <main className="main-body">
@@ -172,26 +284,13 @@ export default function Dashboard() {
                             ) : null}
                           </div>
                         </div>
-                        {/* <div className="col-md-3">
-                          <label htmlFor={"opt_number"} className="form-label">
-                            {"Enter number of options"}
-                          </label>
-                          <input
-                            name="opt_number"
-                            className={"form-control col-md-3"}
-                            type="number"
-                            value={option}
-                            onChange={(e) => setOptions(e.target.value)}
-                          />
-                        </div> */}
-                        {/* {handleOptionNumber(option)} */}
+
                         <div className="col-md-12">
                           <TextField
                             name={`optionA`}
                             showIcon={false}
                             placeholder={`option`}
                             formik={formik}
-                            // onBlur={formik.handleBlur}
                             label={`A`}
                           />
                         </div>
@@ -206,25 +305,7 @@ export default function Dashboard() {
                           />
                         </div>
                         {prevOptAlphabet.length > 2 &&
-                          prevOptAlphabet.map((alphabet, index) => {
-                            if (index > 1) {
-                              return (
-                                <div className={`col-md-12 ${styles.list_box_wrapper}`}>
-                                  <span>
-                                    <ImBin />
-                                  </span>
-                                  <TextField
-                                    name={`option${alphabet}`}
-                                    showIcon={false}
-                                    placeholder={`option`}
-                                    formik={formik}
-                                    // onBlur={formik.handleBlur}
-                                    label={`${alphabet}`}
-                                  />
-                                </div>
-                              );
-                            }
-                          })}
+                          handleAddOptionButtonCLick()}
                         <button
                           onClick={handleOptionNumber}
                           style={{
@@ -234,26 +315,22 @@ export default function Dashboard() {
                             borderRadius: "6px",
                           }}
                           type="button"
+                          id='add'
                         >
                           <img src={addIcon} />
                         </button>
 
                         <div className="col-md-12">
-                          {/* <TextField
-                            name="answer"
-                            showIcon={false}
-                            placeholder="answer"
-                            formik={formik}
-                            label={"Right Option"}
-                          /> */}
-                          <label htmlFor="answer" className="form-label">
+                          <label htmlFor="selectField" className="form-label">
                             Select an option:
                           </label>
                           <select
-                            id="answer"
-                            value={selectedOption}
-                            onChange={handleSelectChange}
+                            id="selectField"
+                            value={formik.values.selectField}
+                            // onChange={handleSelectChange}
+                            onChange={formik.handleChange}
                             className="form-control"
+                            name="selectField"
                           >
                             <option value="">Select an option</option>
                             {prevOptAlphabet.map((option, index) => (

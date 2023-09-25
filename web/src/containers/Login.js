@@ -40,7 +40,7 @@ function Login() {
     adminStore.adminLogin(values).then((res) => {
       if (res.status) {
         // setLoading(false);
-        navigate("/dashboard");
+        navigate("/players");
         setLoading(false);
         // window.location.href = "/users";
       } else {

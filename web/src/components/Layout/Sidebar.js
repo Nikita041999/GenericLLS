@@ -11,7 +11,7 @@ export default function Sidebar({ toggleSidebar }) {
   const [menus, setMenus] = useState([
     // { name: "Dashboard", url: "/dashboard", icon: dashbordIcon },
     { name: "Players", url: "/players", icon: userIcon },
-    { name: "Add Question", url: "/dashboard", icon: userIcon },
+    { name: "Add Question", url: "/add-question", icon: userIcon },
     { name: "Questions", url: "/quiz-list", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
@@ -21,7 +21,7 @@ export default function Sidebar({ toggleSidebar }) {
   const getMenus = () => {
     return menus.map((menu, index) => {
       let pathname = location.pathname.split("/")[1];
-      console.log("pathname", pathname);
+      // console.log("pathname", pathname);
       return (
         // <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>
         <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>

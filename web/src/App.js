@@ -108,7 +108,7 @@ function App() {
                 }
               />
               <Route
-                path="/dashboard"
+                path="/add-question"
                 element={
                   <AdminProtectedRoute>
                     <Dashboard />

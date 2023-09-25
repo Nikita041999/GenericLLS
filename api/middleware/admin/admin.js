@@ -77,10 +77,21 @@ export const forgetPassword = async () => {};
 
 export const quizDataAdd = async (req, res) => {
   console.log(Object.keys(req.body).length);
-  let { question, answer } = req.body;
+  console.log(req.body);
+  let { question, selectField } = req.body;
   question = question.trim();
-  answer = answer.trim();
+  Object.entries(req.body).map(async (opt, index) => {
+    if (opt[0].includes("option")) {
+      const ansOpt = opt[0][opt[0].length - 1];
+      if (selectField === ansOpt) {
+        // console.log(answer,opt[1]);
+        selectField = opt[1].trim();
+      }
+    }
+  });
+  console.log("answer------>",selectField);
   let con = await getConnection();
+  const checkQuestionExistQuery = "select * from questions where questions = ?"
   const qddQuestionQuery = "insert into questions (questions) values(?)";
   const optinIdQuery =
     "select * from question_options where question_id=? and options=?";
@@ -88,16 +99,23 @@ export const quizDataAdd = async (req, res) => {
     "insert into question_options (question_id,options) values (?,?)";
   const addOptionAnswerQuery =
     "insert into question_option_answers (question_id,option_id) values(?,?)";
+
+  // insert question in table
   con
-    .query(qddQuestionQuery, [question])
-    .then(async (data) => {
+    .query(checkQuestionExistQuery, [question])
+    .then(async (quesList) => {
+      console.log("--quesList[0].length > 0)---->",(quesList[0].length > 0));
+      if(!(quesList[0].length > 0)){
+        const data = await con.query(qddQuestionQuery,[question])
       const q_id_query = "select question_id from questions where questions=?";
+      //get question id from table
       const q_id = await con.query(q_id_query, [question]);
       console.log("Object.entries(req.body)>>>>>>", Object.entries(req.body));
       const option_length = Object.entries(req.body).length;
       console.log("*****q_id****", q_id[0][0].question_id);
       Object.entries(req.body).map(async (opt, index) => {
         if (opt[0].includes("option")) {
+          //add option with respective question id
           await con.query(addOptionQuery, [
             q_id[0][0].question_id,
             opt[1].trim(),
@@ -105,7 +123,7 @@ export const quizDataAdd = async (req, res) => {
         }
       });
       con
-        .query(optinIdQuery, [q_id[0][0].question_id, answer])
+        .query(optinIdQuery, [q_id[0][0].question_id, selectField])
         .then(async (val) => {
           console.log("val******", val[0][0].option_id);
           con
@@ -115,6 +133,11 @@ export const quizDataAdd = async (req, res) => {
             ])
             .then(() => res.send({ message: "Data inserted successfully" }));
         });
+      }else{
+        console.log("Question already exists");
+        res.send({message: "Question already exists"})
+      }
+      
     })
     .catch((err) => res.send({ err: err }));
 };
