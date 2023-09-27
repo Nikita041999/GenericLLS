@@ -89,9 +89,9 @@ export const quizDataAdd = async (req, res) => {
       }
     }
   });
-  console.log("answer------>",selectField);
+  console.log("answer------>", selectField);
   let con = await getConnection();
-  const checkQuestionExistQuery = "select * from questions where questions = ?"
+  const checkQuestionExistQuery = "select * from questions where questions = ?";
   const qddQuestionQuery = "insert into questions (questions) values(?)";
   const optinIdQuery =
     "select * from question_options where question_id=? and options=?";
@@ -104,40 +104,40 @@ export const quizDataAdd = async (req, res) => {
   con
     .query(checkQuestionExistQuery, [question])
     .then(async (quesList) => {
-      console.log("--quesList[0].length > 0)---->",(quesList[0].length > 0));
-      if(!(quesList[0].length > 0)){
-        const data = await con.query(qddQuestionQuery,[question])
-      const q_id_query = "select question_id from questions where questions=?";
-      //get question id from table
-      const q_id = await con.query(q_id_query, [question]);
-      console.log("Object.entries(req.body)>>>>>>", Object.entries(req.body));
-      const option_length = Object.entries(req.body).length;
-      console.log("*****q_id****", q_id[0][0].question_id);
-      Object.entries(req.body).map(async (opt, index) => {
-        if (opt[0].includes("option")) {
-          //add option with respective question id
-          await con.query(addOptionQuery, [
-            q_id[0][0].question_id,
-            opt[1].trim(),
-          ]);
-        }
-      });
-      con
-        .query(optinIdQuery, [q_id[0][0].question_id, selectField])
-        .then(async (val) => {
-          console.log("val******", val[0][0].option_id);
-          con
-            .query(addOptionAnswerQuery, [
+      console.log("--quesList[0].length > 0)---->", quesList[0].length > 0);
+      if (!(quesList[0].length > 0)) {
+        const data = await con.query(qddQuestionQuery, [question]);
+        const q_id_query =
+          "select question_id from questions where questions=?";
+        //get question id from table
+        const q_id = await con.query(q_id_query, [question]);
+        console.log("Object.entries(req.body)>>>>>>", Object.entries(req.body));
+        const option_length = Object.entries(req.body).length;
+        console.log("*****q_id****", q_id[0][0].question_id);
+        Object.entries(req.body).map(async (opt, index) => {
+          if (opt[0].includes("option")) {
+            //add option with respective question id
+            await con.query(addOptionQuery, [
               q_id[0][0].question_id,
-              val[0][0].option_id,
-            ])
-            .then(() => res.send({ message: "Data inserted successfully" }));
+              opt[1].trim(),
+            ]);
+          }
         });
-      }else{
+        con
+          .query(optinIdQuery, [q_id[0][0].question_id, selectField])
+          .then(async (val) => {
+            console.log("val******", val[0][0].option_id);
+            con
+              .query(addOptionAnswerQuery, [
+                q_id[0][0].question_id,
+                val[0][0].option_id,
+              ])
+              .then(() => res.send({ message: "Data inserted successfully" }));
+          });
+      } else {
         console.log("Question already exists");
-        res.send({message: "Question already exists"})
+        res.send({ message: "Question already exists" });
       }
-      
     })
     .catch((err) => res.send({ err: err }));
 };
@@ -156,8 +156,33 @@ export const quizList = async (req, res) => {
 };
 
 export const editQuizList = (req, res) => {
+  console.log("*******", req.body);
   const { type, questions, order_id } = req.body;
-  const getQuestionQuery =
+  const getQuestionQuery = 
     "select * from questions where type=? and questions=?";
-  con.query(getQuestionQuery, []);
+  // con.query(getQuestionQuery, []);
+};
+
+export const deleteQuizList = async (req, res) => {
+  console.log("In");
+  const { id } = req.body;
+  console.log("id***", id);
+  // const deleteAnsWerQuery = ""
+  // const deleteOptionQuery = ""
+  // const deleteQuestionQuery = "Delete from "
+  const deleteQuestionQuery = `DELETE q, a, c
+  FROM question_option_answers AS q
+  LEFT JOIN question_options AS c ON q.question_id = c.question_id
+  LEFT JOIN questions AS a ON q.question_id = a.question_id
+  WHERE q.question_id= ?`;
+  const con = await getConnection();
+  con
+    .query(deleteQuestionQuery, [id])
+    .then((data) => {
+      res.send({ message: "Deleted Data" });
+    })
+    .catch((err) => {
+      console.log("****", err);
+      res.send({ message: `Error in deleteing data ${err}` });
+    });
 };

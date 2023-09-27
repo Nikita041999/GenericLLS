@@ -32,6 +32,7 @@ import { AdminProtectedRoute } from "Routes/AdminProtectedRoute";
 import AddQuestion from "components/TradeshowComps/AddQuestion";
 import Dashboard from "containers/Dashboard";
 import QuestionList from "containers/QuestionList";
+import { QuestionProvider } from "lib/contexts/questionContext";
 // import { GoogleLoginButton } from "react-social-login-buttons";
 
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
@@ -64,16 +65,17 @@ function App() {
       <audio ref={audioRef} src={audioFile} autoPlay />
       <AdminProvider>
         <UserProvider>
-          <ToastContainer
-            autoClose={10000}
-            hideProgressBar
-            theme="colored"
-            className="toast-container"
-          />
+          <QuestionProvider>
+            <ToastContainer
+              autoClose={10000}
+              hideProgressBar
+              theme="colored"
+              className="toast-container"
+            />
 
-          <BrowserRouter>
-            <Routes>
-              {/* <Route
+            <BrowserRouter>
+              <Routes>
+                {/* <Route
               path="/"
               element={
                 <UnProtectedRoute>
@@ -81,130 +83,131 @@ function App() {
                 </UnProtectedRoute>
               }
             /> */}
-              <Route
-                path="/"
-                element={
-                  // <StartQuizUnProtectedRoute>
-                  <UnProtectedRoute>
-                    <LoginPlayer />
-                  </UnProtectedRoute>
-                  // </StartQuizUnProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin-login"
-                element={
-                  <AdminUnProtextedRoute>
-                    <Login />
-                  </AdminUnProtextedRoute>
-                }
-              />
-              <Route
-                path="/players"
-                element={
-                  <AdminProtectedRoute>
-                    <Users />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/add-question"
-                element={
-                  <AdminProtectedRoute>
-                    <Dashboard />
-                  </AdminProtectedRoute>
-                }
-              />
-              <Route
-                path="/quiz-list"
-                element={
-                  <AdminProtectedRoute>
-                    <QuestionList />
-                  </AdminProtectedRoute>
-                }
-              />
+                <Route
+                  path="/"
+                  element={
+                    // <StartQuizUnProtectedRoute>
+                    <UnProtectedRoute>
+                      <LoginPlayer />
+                    </UnProtectedRoute>
+                    // </StartQuizUnProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin-login"
+                  element={
+                    <AdminUnProtextedRoute>
+                      <Login />
+                    </AdminUnProtextedRoute>
+                  }
+                />
+                <Route
+                  path="/players"
+                  element={
+                    <AdminProtectedRoute>
+                      <Users />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/add-question"
+                  element={
+                    <AdminProtectedRoute>
+                      <Dashboard />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/quiz-list"
+                  element={
+                    <AdminProtectedRoute>
+                      <QuestionList />
+                    </AdminProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/signup"
-                element={
-                  // <AuthRoute>
-                  <SignupPlayer />
-                  // </AuthRoute>
-                }
-              />
-              <Route
-                path="/introduction"
-                element={
-                  // <PlayerProtectedRoute>
-                  <ProtectedRoute>
-                    <QuizIntro />
-                  </ProtectedRoute>
+                <Route
+                  path="/signup"
+                  element={
+                    // <AuthRoute>
+                    <SignupPlayer />
+                    // </AuthRoute>
+                  }
+                />
+                <Route
+                  path="/introduction"
+                  element={
+                    // <PlayerProtectedRoute>
+                    <ProtectedRoute>
+                      <QuizIntro />
+                    </ProtectedRoute>
 
-                  // </PlayerProtectedRoute>
-                }
-              />
+                    // </PlayerProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/quiz"
-                element={
-                  <PlayerProtectedRoute>
-                    <QuizProtectRoute>
-                      <Questions />
-                    </QuizProtectRoute>
-                  </PlayerProtectedRoute>
-                }
-              />
+                <Route
+                  path="/quiz"
+                  element={
+                    <PlayerProtectedRoute>
+                      <QuizProtectRoute>
+                        <Questions />
+                      </QuizProtectRoute>
+                    </PlayerProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/congratulations"
-                element={
-                  // <PlayerProtectedRoute>
-                  <Congratulation />
-                  // </PlayerProtectedRoute>
-                }
-              />
-              <Route
-                path="/result"
-                element={
-                  // <PlayerProtectedRoute>
-                  <Result />
-                  // </PlayerProtectedRoute>
-                }
-              />
+                <Route
+                  path="/congratulations"
+                  element={
+                    // <PlayerProtectedRoute>
+                    <Congratulation />
+                    // </PlayerProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/result"
+                  element={
+                    // <PlayerProtectedRoute>
+                    <Result />
+                    // </PlayerProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/forgot-password"
-                element={
-                  <UnProtectedRoute>
-                    <ForgetPassword />
-                  </UnProtectedRoute>
-                }
-              />
-              <Route
-                path="/change-password"
-                element={
-                  <UnProtectedRoute>
-                    <ChangePassword />
-                  </UnProtectedRoute>
-                }
-              />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <UnProtectedRoute>
+                      <ForgetPassword />
+                    </UnProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/change-password"
+                  element={
+                    <UnProtectedRoute>
+                      <ChangePassword />
+                    </UnProtectedRoute>
+                  }
+                />
 
-              {/* Using path="*"" means "match anything", so this route
+                {/* Using path="*"" means "match anything", so this route
           acts like a catch-all for URLs that we don't have explicit
           routes for. */}
 
-              {/* user end urls */}
+                {/* user end urls */}
 
-              <Route
-                path="*"
-                element={
-                  <UnProtectedRoute>
-                    <LoginPlayer />
-                  </UnProtectedRoute>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
+                <Route
+                  path="*"
+                  element={
+                    <UnProtectedRoute>
+                      <LoginPlayer />
+                    </UnProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </QuestionProvider>
         </UserProvider>
       </AdminProvider>
     </div>

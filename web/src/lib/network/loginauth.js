@@ -1,11 +1,11 @@
 import axiosClient from "../request";
 
 export function login(data) {
-    console.log("data",data);
+  console.log("data", data);
   return axiosClient.post("/api/login", data);
 }
 export function register(data) {
-    console.log("data",data);
+  console.log("data", data);
   return axiosClient.post("/api/signup", data);
 }
 export function resetPassword(data) {
@@ -17,7 +17,7 @@ export function changePassword(data) {
 }
 
 export function adminlogin(data) {
-  console.log(1,data);
+  console.log(1, data);
   return axiosClient.post("/admin/admin-login", data);
 }
 export function adminchangepassword(data) {
@@ -34,6 +34,10 @@ export function quizQuestionList() {
   return axiosClient.get("/admin/quiz-list");
 }
 
-export function editQuizData(){
-  return axiosClient.post("/admin/edit-quiz-list")
+export function editQuizData(data) {
+  return axiosClient.post("/admin/edit-quiz-list",data);
+}
+
+export function deleteQuizData(data) {
+  return axiosClient.post("/admin/delete-question",data);
 }

@@ -1,21 +1,30 @@
 import Layout from "components/Layout";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import userSvg from "assets/images/users.svg";
 import editSvg from "assets/images/edit-icon.svg";
 import eventSvg from "assets/images/events.svg";
 import { quizQuestionList } from "lib/network/loginauth";
 import styles from "./AdminStyles.module.css";
 import Loader from "components/Loader";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdDataSaverOn } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { editQuizData } from "lib/network/loginauth";
+import { RiSaveLine } from "react-icons/ri";
+import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
+import { QuestionContext } from "lib/contexts/questionContext";
 
 const QuestionList = () => {
+  const { questionId, setQuestionId } = useContext(QuestionContext);
   const [questionList, setQuestionList] = useState([]);
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [typeValue, setTypeValue] = useState("");
+  const [editedType, setEditedType] = useState("");
+  const [editOrder, setEditOrder] = useState(0);
+  // Add a new state variable to track the edited question text
+  const [editedQuestion, setEditedQuestion] = useState("");
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
+  // const [typeValue, setTypeValue] = useState("");
   const getQuestionList = () => {
     return quizQuestionList()
       .then((data) => {
@@ -25,19 +34,81 @@ const QuestionList = () => {
       })
       .catch((err) => console.log("errrr--->", err));
   };
-  const handleQuestionEdit = (e,tableId) => {
-    // editQuizDat
-    const tbl_row = document.getElementById(`table_row_${tableId}`);
-    console.log('---->',tbl_row.getElementsByTagName('td')[2].textContent)
-    setIsEditable(!isEditable);
-    setTypeValue();
+
+  // Function to handle editing of a question
+  const handleQuestionEdit = (e, tableId) => {
+    // Find the question being edited
+    console.log("questionList****", questionList);
+    const editedQuestion = questionList.find(
+      (user, index) => index + 1 === tableId
+    );
+
+    if (editedQuestion) {
+      // If the question is found, set it as the edited question text
+      setEditedQuestion(editedQuestion.questions);
+      setEditedType(editedQuestion.type);
+      setEditOrder(editedQuestion.order_id);
+      setEditingQuestionId(tableId);
+      setIsEditable(!isEditable);
+    }
   };
+  const handleQuestionSave = () => {
+    // Find the question being edited
+
+    const editedQuestionIndex = questionList.findIndex(
+      (user, index) => index + 1 === editingQuestionId
+    );
+    if (editedQuestionIndex !== -1) {
+      // If the question is found, update it with the edited text
+      const updatedQuestionList = [...questionList];
+      updatedQuestionList[editedQuestionIndex].questions = editedQuestion;
+      updatedQuestionList[editedQuestionIndex].type = editedType;
+      updatedQuestionList[editedQuestionIndex].order_id = editOrder;
+      editQuizData(updatedQuestionList[editedQuestionIndex])
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => console.log("----->", err));
+      console.log("***updatedQuestionList***", updatedQuestionList);
+      setQuestionList(updatedQuestionList);
+      setIsEditable(false);
+    }
+  };
+
+  const handleQuestionDelete = (e, tableId) => {
+    const editedQuestionIndex = questionList.findIndex(
+      (user, index) => index + 1 === tableId
+    );
+    console.log(editedQuestionIndex, questionList[editedQuestionIndex]);
+    const { question_id: id } = questionList[editedQuestionIndex];
+    console.log("id", id);
+    const value = {
+      id,
+    };
+    deleteQuizData(value)
+      .then((data) => {
+        console.log("message--->", data);
+        getQuestionList();
+      })
+      .catch((err) => {
+        console.log("errr-> ", err);
+      });
+  };
+  useEffect(() => {
+    console.log("quesList--->", questionList);
+  }, [questionList]);
 
   useEffect(() => {
     getQuestionList();
   }, []);
   const handleTypeChange = (e) => {
-    setTypeValue(e.target.value);
+    setEditedType(e.target.value);
+  };
+  const handleQuestionChange = (e) => {
+    setEditedQuestion(e.target.value);
+  };
+  const handleEditOrder = (e) => {
+    setEditOrder(e.target.value);
   };
 
   const getList = () => {
@@ -52,29 +123,37 @@ const QuestionList = () => {
     } else {
       return questionList?.length ? (
         questionList.map((user, i) => {
-          return (
+          return isEditable && i + 1 === editingQuestionId ? (
             <tr key={i + 1} id={`table_row_${i + 1}`}>
               <td>{i + 1}</td>
-              {isEditable ? (
-                <>
-                  <td>
-                    <input
-                      type="text"
-                      value={typeValue}
-                      onChange={handleTypeChange}
-                      onBlur={handleQuestionEdit}
-                    />
-                  </td>
-                  <td>{user.questions}</td>
-                  <td>{user.order_id}</td>
-                </>
-              ) : (
-                <>
-                  <td>{user.type}</td>
-                  <td>{user.questions}</td>
-                  <td>{user.order_id}</td>
-                </>
-              )}
+              <td>
+                <input
+                  type="text"
+                  value={editedType}
+                  onChange={handleTypeChange}
+                  className="form-control"
+                  // onBlur={handleQuestionEdit}
+                />
+              </td>
+              <td>
+                <textarea
+                  type="text"
+                  value={editedQuestion}
+                  onChange={handleQuestionChange}
+                  className="form-control"
+                  // onBlur={handleQuestionEdit}
+                />
+              </td>
+              <td>
+                {" "}
+                <input
+                  type="number"
+                  value={editOrder}
+                  onChange={handleEditOrder}
+                  className="form-control"
+                  // onBlur={handleQuestionEdit}
+                />
+              </td>
               <td className={styles.button_wrapper}>
                 <div>
                   <button
@@ -82,15 +161,50 @@ const QuestionList = () => {
                       background: "#c5c6d0",
                       color: "#333333",
                     }}
-                    onClick={(e)=>handleQuestionEdit(e,i+1)}
                   >
-                    <MdEdit width={200} />
+                     <MdEdit
+                      width={200}
+                      onClick={(e) => handleQuestionEdit(e, i + 1)}
+                    />
                   </button>
                   <button
                     style={{
                       background: "#202320",
                       color: "#c5c6d0",
                     }}
+                    onClick={(e) => handleQuestionDelete(e, i + 1)}
+                  >
+                    <AiOutlineDelete width={200} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            <tr key={i + 1} id={`table_row_${i + 1}`}>
+              <td>{i + 1}</td>
+              <td>{user.type}</td>
+              <td>{user.questions}</td>
+              <td>{user.order_id}</td>
+              <td className={styles.button_wrapper}>
+                <div>
+                  <button
+                    style={{
+                      background: "#c5c6d0",
+                      color: "#333333",
+                    }}
+                    onClick={(e) => handleQuestionEdit(e, i + 1)}
+                  >
+                    <MdEdit
+                      width={200}
+                      onClick={(e) => handleQuestionEdit(e, i + 1)}
+                    />
+                  </button>
+                  <button
+                    style={{
+                      background: "#202320",
+                      color: "#c5c6d0",
+                    }}
+                    onClick={(e) => handleQuestionDelete(e, i + 1)}
                   >
                     <AiOutlineDelete width={200} />
                   </button>
