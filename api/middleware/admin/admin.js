@@ -155,12 +155,37 @@ export const quizList = async (req, res) => {
   });
 };
 
-export const editQuizList = (req, res) => {
+export const editQuizList = async(req, res) => {
   console.log("*******", req.body);
-  const { type, questions, order_id } = req.body;
-  const getQuestionQuery = 
-    "select * from questions where type=? and questions=?";
-  // con.query(getQuestionQuery, []);
+  const { id } = req.body;
+  const getQuestionQuery = `SELECT
+	q.question_id,
+    q.type,
+    q.questions,
+    q.order_id,
+    o.option_id,
+    o.options,
+    
+    a.option_id as answer_id
+FROM
+    questions AS q
+INNER JOIN
+    question_options AS o ON q.question_id = o.question_id
+INNER JOIN
+    question_option_answers AS a ON q.question_id = a.question_id
+    WHERE
+    q.question_id = ?;`;
+  const con = await getConnection();
+  con
+    .query(getQuestionQuery, [id])
+    .then((data) => {
+      console.log("data****", data[0]);
+      res.send({data:data[0],status:true})
+    })
+    .catch((err) => {
+      console.log(err)
+      res.send({message:`${err}`})
+    });
 };
 
 export const deleteQuizList = async (req, res) => {

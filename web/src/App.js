@@ -33,6 +33,7 @@ import AddQuestion from "components/TradeshowComps/AddQuestion";
 import Dashboard from "containers/Dashboard";
 import QuestionList from "containers/QuestionList";
 import { QuestionProvider } from "lib/contexts/questionContext";
+import EditQuestion from "../src/containers/EditQuestion"
 // import { GoogleLoginButton } from "react-social-login-buttons";
 
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
@@ -114,6 +115,14 @@ function App() {
                   element={
                     <AdminProtectedRoute>
                       <Dashboard />
+                    </AdminProtectedRoute>
+                  }
+                />
+                 <Route
+                  path="/edit-question"
+                  element={
+                    <AdminProtectedRoute>
+                      <EditQuestion />
                     </AdminProtectedRoute>
                   }
                 />
