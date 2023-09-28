@@ -8,14 +8,16 @@ import styles from "./AdminStyles.module.css";
 import Loader from "components/Loader";
 import { MdEdit, MdDataSaverOn } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
-import { editQuizData } from "lib/network/loginauth";
+import { getSingleQuestionData } from "lib/network/loginauth";
 import { RiSaveLine } from "react-icons/ri";
 import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
 import { QuestionContext } from "lib/contexts/questionContext";
+import { useNavigate } from "react-router-dom";
 
 const QuestionList = () => {
-  const { questionId, setQuestionId } = useContext(QuestionContext);
+  const { questionId, setQuestionId,handleEditQuestionId } = useContext(QuestionContext);
+  const navigate = useNavigate()
   const [questionList, setQuestionList] = useState([]);
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -38,18 +40,20 @@ const QuestionList = () => {
   // Function to handle editing of a question
   const handleQuestionEdit = (e, tableId) => {
     // Find the question being edited
-    console.log("questionList****", questionList);
+    // console.log("questionList****", questionList);
     const editedQuestion = questionList.find(
       (user, index) => index + 1 === tableId
     );
 
     if (editedQuestion) {
       // If the question is found, set it as the edited question text
+      handleEditQuestionId(editedQuestion.question_id)
       setEditedQuestion(editedQuestion.questions);
       setEditedType(editedQuestion.type);
       setEditOrder(editedQuestion.order_id);
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
+      navigate("/edit-question");
     }
   };
   const handleQuestionSave = () => {
@@ -64,7 +68,7 @@ const QuestionList = () => {
       updatedQuestionList[editedQuestionIndex].questions = editedQuestion;
       updatedQuestionList[editedQuestionIndex].type = editedType;
       updatedQuestionList[editedQuestionIndex].order_id = editOrder;
-      editQuizData(updatedQuestionList[editedQuestionIndex])
+      getSingleQuestionData(updatedQuestionList[editedQuestionIndex])
         .then((data) => {
           console.log(data);
         })
@@ -123,63 +127,7 @@ const QuestionList = () => {
     } else {
       return questionList?.length ? (
         questionList.map((user, i) => {
-          return isEditable && i + 1 === editingQuestionId ? (
-            <tr key={i + 1} id={`table_row_${i + 1}`}>
-              <td>{i + 1}</td>
-              <td>
-                <input
-                  type="text"
-                  value={editedType}
-                  onChange={handleTypeChange}
-                  className="form-control"
-                  // onBlur={handleQuestionEdit}
-                />
-              </td>
-              <td>
-                <textarea
-                  type="text"
-                  value={editedQuestion}
-                  onChange={handleQuestionChange}
-                  className="form-control"
-                  // onBlur={handleQuestionEdit}
-                />
-              </td>
-              <td>
-                {" "}
-                <input
-                  type="number"
-                  value={editOrder}
-                  onChange={handleEditOrder}
-                  className="form-control"
-                  // onBlur={handleQuestionEdit}
-                />
-              </td>
-              <td className={styles.button_wrapper}>
-                <div>
-                  <button
-                    style={{
-                      background: "#c5c6d0",
-                      color: "#333333",
-                    }}
-                  >
-                     <MdEdit
-                      width={200}
-                      onClick={(e) => handleQuestionEdit(e, i + 1)}
-                    />
-                  </button>
-                  <button
-                    style={{
-                      background: "#202320",
-                      color: "#c5c6d0",
-                    }}
-                    onClick={(e) => handleQuestionDelete(e, i + 1)}
-                  >
-                    <AiOutlineDelete width={200} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ) : (
+          return (
             <tr key={i + 1} id={`table_row_${i + 1}`}>
               <td>{i + 1}</td>
               <td>{user.type}</td>

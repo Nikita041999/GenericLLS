@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { changePassword, loginRoute,sigupRoute,forgetPasswordMail,githubAccessToken ,githubUserData,googleAccessToken,googleUserData,linkedAccessToken,linkedAccessData,facebookAccessToken,facebookAccessData,twitterAccessToken,twitterAccessData} from '../../middleware/user/user.js';
-import { login,quizDataAdd,quizList,editQuizList,deleteQuizList } from '../../middleware/admin/admin.js';
+import { login,quizDataAdd,quizList,getSingleQuestionData,editQuestionData,deleteQuizList } from '../../middleware/admin/admin.js';
 
 
 const jwtMiddleware = (req, res, next) => {
@@ -40,7 +40,8 @@ router.post('/api/change-password',changePassword)
 router.post('/admin/admin-login',login)
 router.post('/admin/quiz-data-add',quizDataAdd)
 router.get('/admin/quiz-list',quizList)
-router.post('/admin/edit-quiz-list',editQuizList)
+router.post('/admin/question-data',getSingleQuestionData)
+router.post('/admin/edit-question',editQuestionData)
 router.post('/admin/delete-question',deleteQuizList)
 
 export default router;

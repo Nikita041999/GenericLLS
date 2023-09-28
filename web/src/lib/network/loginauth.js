@@ -34,10 +34,14 @@ export function quizQuestionList() {
   return axiosClient.get("/admin/quiz-list");
 }
 
-export function editQuizData(data) {
-  return axiosClient.post("/admin/edit-quiz-list",data);
+export function getSingleQuestionData(data) {
+  return axiosClient.post("/admin/question-data",data);
 }
 
 export function deleteQuizData(data) {
   return axiosClient.post("/admin/delete-question",data);
+}
+
+export function editQuestionData(data){
+  return axiosClient.post("/admin/edit-question",data);
 }
