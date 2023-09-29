@@ -8,8 +8,11 @@ import styles from "./AdminStyles.module.css";
 import Loader from "components/Loader";
 import { MdEdit, MdDataSaverOn } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
+import {RiDeleteBin2Fill} from "react-icons/ri"
+import {RiEdit2Fill} from "react-icons/ri"
 import { getSingleQuestionData } from "lib/network/loginauth";
 import { RiSaveLine } from "react-icons/ri";
+import questionListSvg from "assets/images/multi-picklist.svg";
 import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
 import { toast } from "react-toastify";
@@ -168,24 +171,24 @@ const QuestionList = () => {
                 <div>
                   <button
                     style={{
-                      background: "#c5c6d0",
-                      color: "#333333",
+                      background: "transparent",
+                      fontSize:'1.3rem'
                     }}
                     onClick={(e) => handleQuestionEdit(e, i + 1)}
                   >
-                    <MdEdit
-                      width={200}
-                      onClick={(e) => handleQuestionEdit(e, i + 1)}
+                    <RiEdit2Fill
+                      // width={200}
+                      // onClick={(e) => handleQuestionEdit(e, i + 1)}
                     />
                   </button>
                   <button
                     style={{
-                      background: "#202320",
-                      color: "#c5c6d0",
+                      background: "transparent",
+                      fontSize:'1.3rem'
                     }}
                     onClick={(e) => handleQuestionDelete(e, i + 1)}
                   >
-                    <AiOutlineDelete width={200} />
+                    <RiDeleteBin2Fill />
                   </button>
                 </div>
               </td>
@@ -208,7 +211,7 @@ const QuestionList = () => {
           <div className="row flex-fill justify-content-between">
             <div className="col-md-12">
               <div>
-                <h1>Welcome Admin</h1>
+                {/* <h1>Welcome Admin</h1> */}
                 <div
                   style={{ background: "#F5F5F5" }}
                   className={`${styles.list_wrapper} row mt-4`}
@@ -217,25 +220,25 @@ const QuestionList = () => {
                     <a href="/users">
                       <div className="card_dash mb-3">
                         <div className="cardinfo">
-                          <label>Total Quizes Conducted</label>
+                          <label>Questionnaire</label>
                           <strong>{/* {data.present_players} */}</strong>
                         </div>
                         <div className="cardIcon">
-                          <img src={userSvg} alt="icon" />
+                          <img src={questionListSvg} alt="icon" />
                         </div>
                       </div>
                     </a>
-                    <a href="/users" style={{ marginLeft: "1rem" }}>
+                    {/* <a href="/users" style={{ marginLeft: "1rem" }}>
                       <div className="card_dash mb-3">
                         <div className="cardinfo">
                           <label>Total Quizes Conducted</label>
-                          <strong>{/* {data.present_players} */}</strong>
+                          <strong></strong>
                         </div>
                         <div className="cardIcon">
                           <img src={userSvg} alt="icon" />
                         </div>
                       </div>
-                    </a>
+                    </a> */}
                   </div>
                   {/* <ul>
                     {questionList?.map((ques, index) => {

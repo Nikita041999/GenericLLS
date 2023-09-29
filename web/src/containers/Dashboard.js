@@ -142,7 +142,7 @@ export default function Dashboard() {
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
             >
-              <span onClick={() => handleDeleteOption(alphabet)} style={{fontSize:'1.25rem'}}>
+              <span onClick={() => handleDeleteOption(alphabet)}>
                 <GrSubtractCircle />
               </span>
               <TextField

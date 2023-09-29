@@ -20,6 +20,7 @@ import { GrAddCircle } from "react-icons/gr";
 import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import {  IoAddCircle} from "react-icons/io5"
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
@@ -383,7 +384,7 @@ export default function Dashboard() {
 
                           {/* {prevOptAlphabet.length > lastIndex &&
                             handleAddOptionButtonCLick()} */}
-                          <button
+                          {/* <button
                             onClick={handleOptionNumber}
                             style={{
                               width: "fit-content",
@@ -396,7 +397,23 @@ export default function Dashboard() {
                             id="add"
                           >
                             <GrAddCircle />
-                          </button>
+                          </button> */}
+
+                          <button
+                          onClick={handleOptionNumber}
+                          style={{
+                            width: "fit-content",
+                            background: "transparent",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: '1.8rem',
+                            marginTop: '0px'
+                          }}
+                          type="button"
+                          id="add"
+                        > 
+                          <IoAddCircle />
+                        </button>
 
                           <div className="col-md-12">
                             <label htmlFor="selectField" className="form-label">

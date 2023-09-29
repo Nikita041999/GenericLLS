@@ -262,7 +262,7 @@ const playerData =()=>{
                   </div>
                 </div>
               </a>
-              <a href='/dashboard' style={{marginLeft:'1rem'}}>
+              {/* <a href='/dashboard' style={{marginLeft:'1rem'}}>
                 <div className={`mb-3 ${styles.card_dash}`}>
                   <div className={styles.cardinfo}>
                     <label>Add Questions</label>
@@ -283,7 +283,7 @@ const playerData =()=>{
                     <img src={userSvg} alt="icon" />
                   </div>
                 </div>
-              </a>
+              </a> */}
             </div>
 
             <div className="col-md-12">

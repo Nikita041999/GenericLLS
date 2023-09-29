@@ -237,7 +237,7 @@ h1, .white_box h2{font-size: 24px;font-weight: 600;margin: 0;margin-right: auto;
 .list_box_wrapper>span {
     position: absolute;
     right: 0;
-    top: 0.8rem;
+    top: 1.25rem;
     z-index:1;
   }
 

@@ -1,6 +1,7 @@
 import logo from "assets/images/trdeshowlogo.png";
 import userIcon from "assets/images/users.svg";
 import eventIcon from "assets/images/events.svg";
+import questionList from "assets/images/multi-picklist.svg";
 import styles from '../../containers/Users.module.css'
 import dashbordIcon from "assets/images/manage_masters.svg";
 import { useState } from "react";
@@ -11,8 +12,8 @@ export default function Sidebar({ toggleSidebar }) {
   const [menus, setMenus] = useState([
     // { name: "Dashboard", url: "/dashboard", icon: dashbordIcon },
     { name: "Players", url: "/players", icon: userIcon },
-    { name: "Add Question", url: "/add-question", icon: userIcon },
-    { name: "Questions", url: "/quiz-list", icon: userIcon },
+    { name: "Add Question", url: "/add-question", icon: eventIcon },
+    { name: "Questionnaire", url: "/quiz-list", icon: questionList },
     // { name: "Questions", url: "/quiz-list", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
