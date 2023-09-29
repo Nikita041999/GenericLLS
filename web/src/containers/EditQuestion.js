@@ -19,6 +19,7 @@ import { GrSubtractCircle } from "react-icons/gr";
 import { GrAddCircle } from "react-icons/gr";
 import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
@@ -44,6 +45,7 @@ export default function Dashboard() {
   const [deleteOptionId, setDeleteOptionId] = useState("");
   const [initialValues1, setInitialValues1] = useState(initialValues);
   const [buttonType, setButtonType] = useState("");
+  const [lastIndex, setLastIndex] = useState(0);
   const [validationSchema1, setValidationSchema1] = useState(validationSchema);
   const formik = useFormik({
     initialValues: initialValues1,
@@ -54,6 +56,8 @@ export default function Dashboard() {
       values["answer_id"] = data["answer_id"];
       values["correct_option"] = data["correct_option"];
       values["options"] = data["options"];
+      console.log('------------------------>',prevOptAlphabet.length);
+      values['option_length'] = prevOptAlphabet.length
       resetForm({ values: "" });
       handleResetNameField();
       editQuestionData(values)
@@ -61,6 +65,7 @@ export default function Dashboard() {
           setOptions(null);
           console.log("dataaaaa", data.message);
           resetForm({ values: "" });
+          localStorage.setItem('isEdited','yes')
           navigate("/quiz-list");
         })
         .catch((err) => console.log(err));
@@ -100,11 +105,6 @@ export default function Dashboard() {
               }
             } else {
               if (vals == "answer_id") {
-                // const charCode = "A".charCodeAt(0);
-                // const currentAlphabet = String.fromCharCode(
-                //   charCode + item[vals]
-                // );
-                // console.log('-->',currentAlphabet);
                 result[vals] = item[vals];
               } else {
                 result[vals] = item[vals];
@@ -118,17 +118,16 @@ export default function Dashboard() {
         if (Object.keys(result["options"]).length > TempArr.length) {
           for (let i = 3; i < Object.keys(result["options"]).length + 1; i++) {
             const charCode = TempArr[TempArr.length - 1].charCodeAt(0);
-            // console.log("charCode****", charCode);
             const currentAlphabet = String.fromCharCode(charCode + 1);
             TempArr.push(currentAlphabet);
           }
         }
+        setLastIndex(TempArr.length - 1);
         setOptionAlphabet([...TempArr]);
         Object.keys(result["options"]).map((opt, i) => {
           if (opt == result["answer_id"]) {
             const charCode = TempArr[i].charCodeAt(0);
             const currentAlphabet = String.fromCharCode(charCode);
-            // console.log('-->',currentAlphabet);
             result["correct_option"] = currentAlphabet;
           }
         });
@@ -138,6 +137,10 @@ export default function Dashboard() {
       .catch((err) => console.log("------->", err));
   };
   useEffect(() => {
+    // 'location','edit_quiz'
+    if(! localStorage.getItem('location')){
+      navigate('/quiz-list')
+    }
     getEditQuestionData();
   }, []);
 
@@ -168,18 +171,17 @@ export default function Dashboard() {
     setValidationSchema(updatedValidationSchema);
   };
   useEffect(() => {
-    console.log("dataaaa", data);
     if (option > 0) {
       handleInitialOptions();
     }
-  }, [data, option, prevOptAlphabet]);
+  }, [data, option, prevOptAlphabet, lastIndex]);
 
   const handleOptionNumber = () => {
     setButtonType("add");
     const charCode = prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
     const currentAlphabet = String.fromCharCode(charCode + 1);
     setOptionAlphabet((prev) => [...prev, currentAlphabet]);
-    console.log("currr", currentAlphabet);
+    setLastIndex(prevOptAlphabet.length);
     const updatedInitialValues = {
       ...initialValues, // Spread the existing state
       [`option${currentAlphabet}`]: "", // Add the new key-value pair
@@ -194,87 +196,95 @@ export default function Dashboard() {
   };
 
   const handleAddOptionButtonCLick = () => {
-    return prevOptAlphabet.map((alphabet, index) => {
-      if (index > option - 1) {
-        if (index == prevOptAlphabet.length - 1) {
-          return (
-            <div
-              className={`col-md-12 ${styles.list_box_wrapper}`}
-              id={`remove_${alphabet}`}
-            >
-              <span onClick={() => handleDeleteOption(alphabet)}>
-                <GrSubtractCircle />
-              </span>
-              <TextField
-                name={`option${alphabet}`}
-                showIcon={false}
-                placeholder={`option`}
-                formik={formik}
-                // onBlur={formik.handleBlur}
-                label={`${alphabet}`}
-              />
-            </div>
-          );
-        } else {
-          return (
-            <div
-              className={`col-md-12 ${styles.list_box_wrapper}`}
-              id={`remove_${alphabet}`}
-            >
-              <TextField
-                name={`option${alphabet}`}
-                showIcon={false}
-                placeholder={`option`}
-                formik={formik}
-                // onBlur={formik.handleBlur}
-                label={`${alphabet}`}
-              />
-            </div>
-          );
-        }
-      }
-    });
+    // if (option == lastIndex) {
+    return (
+      <div
+        className={`col-md-12 ${styles.list_box_wrapper}`}
+        id={`remove_${prevOptAlphabet[lastIndex]}`}
+      >
+        <span onClick={() => handleDeleteOption(prevOptAlphabet[lastIndex])}>
+          <GrSubtractCircle />
+        </span>
+        <TextField
+          name={`option${prevOptAlphabet[lastIndex]}`}
+          showIcon={false}
+          placeholder={`option`}
+          formik={formik}
+          // onBlur={formik.handleBlur}
+          label={`${prevOptAlphabet[lastIndex]}`}
+        />
+      </div>
+    );
+    // } else {
+    //   return prevOptAlphabet.map((alphabet, index) => {
+    //     console.log("***************", index, lastIndex);
+    //     if (index > option - 1) {
+    //       if (index == prevOptAlphabet.length - 1) {
+    //         return (
+    //           <div
+    //             className={`col-md-12 ${styles.list_box_wrapper}`}
+    //             id={`remove_${alphabet}`}
+    //           >
+    //             <span onClick={() => handleDeleteOption(alphabet)}>
+    //               <GrSubtractCircle />
+    //             </span>
+    //             <TextField
+    //               name={`option${alphabet}`}
+    //               showIcon={false}
+    //               placeholder={`option`}
+    //               formik={formik}
+    //               // onBlur={formik.handleBlur}
+    //               label={`${alphabet}`}
+    //             />
+    //           </div>
+    //         );
+    //       } else {
+    //         return (
+    //           <div
+    //             className={`col-md-12 ${styles.list_box_wrapper}`}
+    //             id={`remove_${alphabet}`}
+    //           >
+    //             <TextField
+    //               name={`option${alphabet}`}
+    //               showIcon={false}
+    //               placeholder={`option`}
+    //               formik={formik}
+    //               // onBlur={formik.handleBlur}
+    //               label={`${alphabet}`}
+    //             />
+    //           </div>
+    //         );
+    //       }
+    //     }
+    //   });
+    // }
   };
 
   const handleDeleteOption = (alphabet) => {
     setButtonType("delete");
     setDeleteOptionId(alphabet);
-    if (prevOptAlphabet.length <= option) {
-      let updatedOptionArray = prevOptAlphabet;
-      const lastAlphabet = updatedOptionArray.pop();
-      setOptionAlphabet((prev) => [...updatedOptionArray]);
-      const charCode = alphabet.charCodeAt(0);
-      const updatedInitialValues = initialValues;
-      const updatedValidationSchema = validationSchema;
-      delete updatedInitialValues[`option${lastAlphabet}`];
-      delete updatedValidationSchema[`option${lastAlphabet}`];
-      setInitialValues1(updatedInitialValues);
-      setValidationSchema1(updatedValidationSchema);
-      setOptions(option - 1);
-      let del_id = Object.keys(data["options"]);
-      const val = del_id[del_id.length-1]
-      let updateData = { ...data };
-      console.log("updateData*******",updateData);
-      console.log("******",updateData["options"][val]);
-      delete updateData["options"][val];
-      console.log("--updateData----", updateData);
-      setData({ ...updateData });
-    } else {
-      let updatedOptionArray = prevOptAlphabet;
-      const lastAlphabet = updatedOptionArray.pop();
-      setOptionAlphabet((prev) => [...updatedOptionArray]);
-      const charCode = alphabet.charCodeAt(0);
-      const updatedInitialValues = initialValues;
-      const updatedValidationSchema = validationSchema;
-      delete updatedInitialValues[`option${lastAlphabet}`];
-      delete updatedValidationSchema[`option${lastAlphabet}`];
-      setInitialValues1(updatedInitialValues);
-      setValidationSchema1(updatedValidationSchema);
-    }
+    // if (prevOptAlphabet.length <= option) {
+    let updatedOptionArray = prevOptAlphabet;
+    const lastAlphabet = updatedOptionArray.pop();
+    setOptionAlphabet((prev) => [...updatedOptionArray]);
+    setLastIndex(updatedOptionArray.length - 1);
+    const charCode = alphabet.charCodeAt(0);
+    const updatedInitialValues = initialValues;
+    const updatedValidationSchema = validationSchema;
+    delete updatedInitialValues[`option${lastAlphabet}`];
+    delete updatedValidationSchema[`option${lastAlphabet}`];
+    setInitialValues1(updatedInitialValues);
+    setValidationSchema1(updatedValidationSchema);
+    setOptions(option - 1);
+    let del_id = Object.keys(data["options"]);
+    const val = del_id[del_id.length - 1];
+    let updateData = { ...data };
+    // delete updateData["options"][val];
+    setData({ ...updateData });
   };
 
   const handleResetNameField = () => {
-    console.log("initialValues******", initialValues);
+    // console.log("initialValues******", initialValues);
     Object.keys(initialValues).map((opt, index) => {
       if (opt.includes("option")) {
         formik.setFieldValue(opt, "");
@@ -323,57 +333,56 @@ export default function Dashboard() {
                             </div>
                           </div>
 
-                          {option > 0 &&
-                            Object.keys(data["options"])?.map((opt, i) => {
-                              console.log(
-                                "i == option.length - 1",
-                                i == option.length,
-                                i,
-                                option
+                          {prevOptAlphabet?.map((opt, i) => {
+                            let a = Object.keys(data["options"]);
+                            let currOpt = a[i];
+                            if (i < lastIndex || i<2) {
+                              return (
+                                <div className="col-md-12">
+                                  <TextField
+                                    name={`option${prevOptAlphabet[i]}`}
+                                    showIcon={false}
+                                    placeholder={`option`}
+                                    formik={formik}
+                                    val={data["options"][currOpt]}
+                                    // onBlur={formik.handleBlur}
+                                    label={`${prevOptAlphabet[i]}`}
+                                  />
+                                </div>
                               );
-                              if (i > 1 && i == option - 1) {
-                                return (
-                                  <div
-                                    className={`col-md-12 ${styles.list_box_wrapper}`}
-                                    id={`remove_${prevOptAlphabet[i]}`}
+                            } else {
+                              return (
+                                <div
+                                  className={`col-md-12 ${styles.list_box_wrapper}`}
+                                  id={`remove_${prevOptAlphabet[i]}`}
+                                >
+                                  <span
+                                    onClick={() =>
+                                      handleDeleteOption(prevOptAlphabet[i])
+                                    }
                                   >
-                                    <span
-                                      onClick={() =>
-                                        handleDeleteOption(prevOptAlphabet[i])
-                                      }
-                                    >
-                                      <GrSubtractCircle />
-                                    </span>
-                                    <TextField
-                                      name={`option${prevOptAlphabet[i]}`}
-                                      showIcon={false}
-                                      placeholder={`option`}
-                                      formik={formik}
-                                      val={data["options"][opt]}
-                                      // onBlur={formik.handleBlur}
-                                      label={`${prevOptAlphabet[i]}`}
-                                    />
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <div className="col-md-12">
-                                    <TextField
-                                      name={`option${prevOptAlphabet[i]}`}
-                                      showIcon={false}
-                                      placeholder={`option`}
-                                      formik={formik}
-                                      val={data["options"][opt]}
-                                      // onBlur={formik.handleBlur}
-                                      label={`${prevOptAlphabet[i]}`}
-                                    />
-                                  </div>
-                                );
-                              }
-                            })}
+                                    <GrSubtractCircle />
+                                  </span>
+                                  <TextField
+                                    name={`option${prevOptAlphabet[i]}`}
+                                    showIcon={false}
+                                    placeholder={`option`}
+                                    formik={formik}
+                                    val={
+                                      data["options"][currOpt]
+                                        ? data["options"][currOpt]
+                                        : ""
+                                    }
+                                    // onBlur={formik.handleBlur}
+                                    label={`${prevOptAlphabet[i]}`}
+                                  />
+                                </div>
+                              );
+                            }
+                          })}
 
-                          {prevOptAlphabet.length > option &&
-                            handleAddOptionButtonCLick()}
+                          {/* {prevOptAlphabet.length > lastIndex &&
+                            handleAddOptionButtonCLick()} */}
                           <button
                             onClick={handleOptionNumber}
                             style={{
@@ -413,6 +422,12 @@ export default function Dashboard() {
                                 </option>
                               ))}
                             </select>
+                            {/* {formik.touched.selectField &&
+                            formik.errors.selectField ? (
+                              <div className="error">
+                                {formik.errors.selectField}
+                              </div>
+                            ) : null} */}
                           </div>
 
                           <div

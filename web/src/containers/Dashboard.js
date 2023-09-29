@@ -12,7 +12,9 @@ import { AdminContext } from "lib/contexts/adminContext";
 import { quizDataAdd } from "lib/network/loginauth";
 import addIcon from "assets/images/add_icon.svg";
 import { GrSubtractCircle } from "react-icons/gr";
-import { GrAddCircle} from "react-icons/gr"
+// import { GrAddCircle} from "react-icons/gr"
+import {  IoAddCircle} from "react-icons/io5"
+import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const initialValues1 = {
     question: "",
@@ -22,10 +24,12 @@ export default function Dashboard() {
   };
   const validationSchema1 = {
     question: Yup.string().required("Please enter question"),
-    selectField: Yup.string().required("Please enter answer"),
-    optionA: Yup.string().required("Please enter option A"),
-    optionB: Yup.string().required("Please enter option B"),
+    selectField: Yup.string().required('Please select an option'),
+    // .oneOf(validOptions, 'Invalid option selected'),
+    optionA: Yup.string().required("Please enter option"),
+    optionB: Yup.string().required("Please enter option"),
   };
+  const navigate = useNavigate()
   const [data, setData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [option, setOptions] = useState(null);
@@ -39,8 +43,7 @@ export default function Dashboard() {
     // console.log("options******", option);
   }, [option]);
   useEffect(() => {
-    // setLoading(true);
-    // console.log("isLoading>>>>", isLoading);
+  localStorage.setItem('location','add_question')
   }, []);
 
   const formik = useFormik({
@@ -53,12 +56,14 @@ export default function Dashboard() {
       resetForm({ values: "" });
 
       handleResetNameField();
-      console.log(values);
+      console.log('values',values);
       quizDataAdd(values)
         .then((data) => {
           console.log("data------>", data);
           setOptions(null);
           resetForm({ values: "" });
+          localStorage.setItem('isQuestionAdded','yes')
+          navigate('/quiz-list')
         })
         .catch((err) => console.log(err));
       console.log("***************** inside login fn 2", values);
@@ -83,7 +88,7 @@ export default function Dashboard() {
       ...validationSchema,
       // ...validationSchema1,
       [`option${currentAlphabet}`]: Yup.string().required(
-        `Please enter option ${prevOptAlphabet[prevOptAlphabet.length - 1]},`
+        `Please enter option`
       ),
     };
     setValidationSchema(updatedValidationSchema);
@@ -137,7 +142,7 @@ export default function Dashboard() {
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
             >
-              <span onClick={() => handleDeleteOption(alphabet)}>
+              <span onClick={() => handleDeleteOption(alphabet)} style={{fontSize:'1.25rem'}}>
                 <GrSubtractCircle />
               </span>
               <TextField
@@ -313,15 +318,16 @@ export default function Dashboard() {
                           onClick={handleOptionNumber}
                           style={{
                             width: "fit-content",
-                            background: "#c5c6d0",
+                            background: "transparent",
                             border: "none",
                             borderRadius: "6px",
-                            color:"white"
+                            fontSize: '1.8rem',
+                            marginTop: '0px'
                           }}
                           type="button"
                           id="add"
-                        >
-                          <GrAddCircle />
+                        > 
+                          <IoAddCircle />
                         </button>
 
                         <div className="col-md-12">
@@ -343,6 +349,12 @@ export default function Dashboard() {
                               </option>
                             ))}
                           </select>
+                          {formik.touched.selectField &&
+                            formik.errors.selectField ? (
+                              <div className="error">
+                                {formik.errors.selectField}
+                              </div>
+                            ) : null}
                         </div>
 
                         <div

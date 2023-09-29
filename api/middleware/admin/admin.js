@@ -108,13 +108,16 @@ export const quizDataAdd = async (req, res) => {
         console.log("Object.entries(req.body)>>>>>>", Object.entries(req.body));
         const option_length = Object.entries(req.body).length;
         console.log("*****q_id****", q_id[0][0].question_id);
+
         Object.entries(req.body).map(async (opt, index) => {
           if (opt[0].includes("option")) {
             //add option with respective question id
-            await con.query(addOptionQuery, [
-              q_id[0][0].question_id,
-              opt[1].trim(),
-            ]);
+            if (index < option_length) {
+              await con.query(addOptionQuery, [
+                q_id[0][0].question_id,
+                opt[1].trim(),
+              ]);
+            }
           }
         });
         con
@@ -210,18 +213,52 @@ function arraysAreEqual(arr1, arr2) {
 
 export const editQuestionData = async (req, res) => {
   console.log("--->", req.body);
-  let { id, question, options, selectField } = req.body;
-
+  let { id, question, options, selectField, option_length } = req.body;
+  question = question.trim();
   const updateQuestionQurey = `UPDATE questions
 SET questions = ?
 WHERE question_id = ?;`;
-
-  const updateOptionQuery = `Update question_options SET options=? where  option_id=?  `;
-  const getPreviousOptions = `select * from question_options where question_id=?`;
-  const updateAnswerQuery = `Update question_option_answers SET option_id=? where  question_id=? `;
   const optinIdQuery =
     "select * from question_options where question_id=? and options=?";
+  //   const updateOptionQuery = `Update question_options SET options=? where  option_id=?  `;
+  const getPreviousOptions = `select * from question_options where question_id=?`;
+  const deleteAllOptionQuery = `delete from question_options where option_id=?`;
+  const addOptionQuery =
+    "insert into question_options (question_id,options) values (?,?)";
+  const updateAnswerQuery = `Update question_option_answers SET option_id=? where  question_id=? `;
+  const deleteAnswerQuery = ` delete from question_option_answers where question_id=?`;
+  const addOptionAnswerQuery =
+    "insert into question_option_answers (question_id,option_id) values(?,?)";
+  //   const optinIdQuery =
+  //     "select * from question_options where question_id=? and options=?";
+  console.log("****", option_length);
+  console.log("req.body----->", req.body);
+  let option_list = {};
+  const regex = /option[A-Z]/g;
+  Object.entries(req.body).map(async (opt, index) => {
+    if (opt[0].match(regex)) {
+      console.log("******", index, option_length);
+      console.log(">>>>>>", opt[0]);
+      option_list[opt[0]] = req.body[opt[0]];
+    }
+  });
+  let final_option_list = {};
+  Object.entries(option_list).map(async (opt, index) => {
+    if (opt[0].match(regex) && index < option_length) {
+      final_option_list[opt[0]] = option_list[opt[0]];
+    }
+  });
+  console.log("option_list--->", final_option_list);
 
+  Object.entries(req.body).map(async (opt, index) => {
+    if (opt[0].includes("option") && opt[0] != "options") {
+      const ansOpt = opt[0][opt[0].length - 1];
+      if (selectField === ansOpt) {
+        selectField = opt[1].trim();
+      }
+    }
+  });
+  console.log("answer------>", selectField);
   const con = await getConnection();
   con
     .query(updateQuestionQurey, [question, id])
@@ -231,243 +268,24 @@ WHERE question_id = ?;`;
       prevOpt[0].map((data) => {
         array1.push(data["option_id"]);
       });
-      Object.entries(req.body).map(async (opt, index) => {
-        if (opt[0].includes("option") && opt[0] != "options") {
-          const ansOpt = opt[0][opt[0].length - 1];
-          console.log("selectField*", selectField, ansOpt);
-          if (selectField === ansOpt) {
-            selectField = opt[1].trim();
-          }
-        }
-      });
-      const temp = Object.keys(options);
-      let array2 = [];
-      temp.forEach((element) => {
-        array2.push(parseInt(element));
+      await con.query(deleteAnswerQuery, [id]);
+      console.log(">>>>>>", array1);
+      array1.map(async (opt, i) => {
+        await con.query(deleteAllOptionQuery, [opt]);
       });
 
-      let finalOptions = {};
-      let option1 = [];
-      let extraOptions = [];
-      let max_index = 0;
-      // if (array1.length == array2.length) {
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-      //   option1.map((opt, i) => {
-      //     Object.keys(finalOptions).map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //         }
-      //       }
-      //     });
-      //   });
-      // } else if (array1.length > array2.length) {
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-
-      //   Object.keys(finalOptions).map((opt, i) => {
-      //     option1.map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //           max_index = i;
-      //         }
-      //       }
-      //     });
-      //   });
-      //   if (max_index < Object.keys(finalOptions).length - 1) {
-      //     Object.keys(finalOptions).map((opt, i) => {
-      //       if (i > max_index) {
-      //         console.log(
-      //           "*****Object.keys(finalOptions)[i]***",
-      //           Object.keys(finalOptions)[i]
-      //         );
-      //         extraOptions.push(Object.keys(finalOptions)[i]);
-      //       }
-      //     });
-      //   }
-      // } else {
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-      //   option1.map((opt, i) => {
-      //     Object.keys(finalOptions).map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //           max_index = index
-      //         }
-      //       }
-      //     });
-      //   });
-      //   if (max_index < option1.length - 1) {
-      //     option1.map((opt, i) => {
-      //       if (i > max_index) {
-      //         console.log(
-      //           "*****Object.keys(finalOptions)[i]***",
-      //           Object.keys(finalOptions)[i]
-      //         );
-      //         extraOptions.push(opt);
-      //       }
-      //     });
-      //   }
-      //     }
-      //   });
-      // }
-
-      // if arrays are equal, just update all values
-      // if (arraysAreEqual(array1, array2)) {
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-      //   option1.map((opt, i) => {
-      //     Object.keys(finalOptions).map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //         }
-      //       }
-      //     });
-      //   });
-
-      //   Object.entries(finalOptions).map(async (opt, index) => {
-      //     con
-      //       .query(updateOptionQuery, [opt[1].trim(), opt[0]])
-      //       .then((data1) => {
-      //         con.query(optinIdQuery, [id, selectField]).then((data) => {
-      //           con
-      //             .query(updateAnswerQuery, [data[0][0].option_id, id])
-      //             .then((data2) => {
-      //               res.send({
-      //                 message: "Data has been updated",
-      //                 status: true,
-      //               });
-      //             });
-      //         });
-      //       });
-      //   });
-      // }
-
-      // //if array is one array is deleted array1 is prev array and array 2 is curr array
-      // else if (array1.length > array2.length) {
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-
-      //   Object.keys(finalOptions).map((opt, i) => {
-      //     option1.map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //           max_index = i;
-      //         }
-      //       }
-      //     });
-      //   });
-      //   if (max_index < Object.keys(finalOptions).length - 1) {
-      //     Object.keys(finalOptions).map((opt, i) => {
-      //       if (i > max_index) {
-      //         console.log(
-      //           "*****Object.keys(finalOptions)[i]***",
-      //           Object.keys(finalOptions)[i]
-      //         );
-      //         extraOptions.push(Object.keys(finalOptions)[i]);
-      //       }
-      //     });
-      //   }
-
-      //   const deleteOptionQuery = `delete from question_options where question_id=? and option_id=?`;
-      //   Object.entries(finalOptions).map(async (opt, index) => {
-      //     con
-      //       .query(updateOptionQuery, [opt[1].trim(), opt[0]])
-      //       .then((data1) => {
-      //         //delete extra options
-      //         extraOptions.forEach(async (val) => {
-      //           await con.query(deleteOptionQuery, [id, val]);
-      //         });
-      //         con.query(optinIdQuery, [id, selectField]).then((data) => {
-      //           con
-      //             .query(updateAnswerQuery, [data[0][0].option_id, id])
-      //             .then(async (data2) => {
-      //               res.send({
-      //                 message: "Data has been updated",
-      //                 status: true,
-      //               });
-      //             });
-      //         });
-      //       });
-      //   });
-      // } else {
-      //   // if an option was added from frontend
-      //   finalOptions = { ...options };
-      //   Object.entries(req.body).map((opt, i) => {
-      //     if (opt[0].includes("option") && opt[0] != "options") {
-      //       option1.push(opt[1]);
-      //     }
-      //   });
-      //   option1.map((opt, i) => {
-      //     Object.keys(finalOptions).map((v, index) => {
-      //       {
-      //         if (i === index) {
-      //           finalOptions[v] = opt;
-      //           max_index = index;
-      //         }
-      //       }
-      //     });
-      //   });
-      //   if (max_index < option1.length - 1) {
-      //     option1.map((opt, i) => {
-      //       if (i > max_index) {
-      //         console.log(
-      //           "*****Object.keys(finalOptions)[i]***",
-      //           Object.keys(finalOptions)[i]
-      //         );
-      //         extraOptions.push(opt);
-      //       }
-      //     });
-      //   }
-      //   const updateNewOptionEntries =
-      //     "insert into question_options (question_id,options) values (?,?)";
-      //   Object.entries(finalOptions).map(async (opt, index) => {
-      //     con
-      //       .query(updateOptionQuery, [opt[1].trim(), opt[0]])
-      //       .then((data1) => {
-      //         extraOptions.forEach(async (val) => {
-      //           await con.query(updateNewOptionEntries, [id, val]);
-      //         });
-      //         con.query(optinIdQuery, [id, selectField]).then((data) => {
-      //           con
-      //             .query(updateAnswerQuery, [data[0][0].option_id, id])
-      //             .then(async (data2) => {
-      //               //delete extra options
-      //               res.send({
-      //                 message: "Data has been updated",
-      //                 status: true,
-      //               });
-      //             });
-      //         });
-      //       });
-      //   });
-      // }
-
+      Object.entries(final_option_list).map(async (opt, index) => {
+        //add option with respective question id
+        await con.query(addOptionQuery, [id, opt[1].trim()]);
+      });
+      con.query(optinIdQuery, [id, selectField]).then(async (val) => {
+        console.log("val******", val[0][0].option_id);
+        con
+          .query(addOptionAnswerQuery, [id, val[0][0].option_id])
+          .then(() =>
+            res.send({ message: "Data updated successfully", status: true })
+          );
+      });
     })
     .catch((err) => {
       res.send({ message: `Cannot update data, err${err}`, status: false });

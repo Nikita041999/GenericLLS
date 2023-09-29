@@ -25,27 +25,28 @@ export const QuestionProvider = ({ children }) => {
         let result = {};
         let opts = {};
         // Iterate through the data array
+        console.log('*****************',data.data.data);
         for (const item of data.data.data) {
           Object.keys(item).map((vals, i) => {
             if (vals == "option_id" || vals == "options") {
               // Check if the optionId already exists in the result object
               if (result.hasOwnProperty("options")) {
                 if (!opts.hasOwnProperty(opts[item["option_id"]])) {
-                  opts[item["option_id"]] = item["options"];
+                  opts[item["option_id"]] = " " +item["options"];
                   result["options"] = opts;
                 }
               } else {
                 // Create a new array for the optionId and add the options
                 if (vals == "option_id") {
-                  opts[item["option_id"]] = item["options"];
+                  opts[item["option_id"]] = " " +item["options"];
                   result["options"] = opts;
                 }
               }
             } else {
               if (vals == "answer_id") {
-                result[vals] = item[vals];
+                result[vals] = " " +item[vals ];
               } else {
-                result[vals] = item[vals];
+                result[vals] = " " +item[vals];
               }
             }
           });
@@ -60,11 +61,15 @@ export const QuestionProvider = ({ children }) => {
           }
         }
         setOptionAlphabet([...TempArr]);
+        console.log("------->",result["options"],result["answer_id"]);
         Object.keys(result["options"]).map((opt, i) => {
-          if (opt == result["answer_id"]) {
+          console.log("***opt,answerid****",opt,result["answer_id"],typeof opt,typeof (result["answer_id"]),opt == result["answer_id"]);
+          const a = result["answer_id"]
+          if (parseInt(opt) == parseInt(a)) {
+            console.log("TempArr[i]",TempArr[i]);
             const charCode = TempArr[i].charCodeAt(0);
             const currentAlphabet = String.fromCharCode(charCode);
-            // console.log('-->',currentAlphabet);
+            console.log('-->',currentAlphabet);
             setCorrectAnswerOption(currentAlphabet)
             result["correct_option"] = currentAlphabet;
           }

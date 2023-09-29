@@ -12,12 +12,14 @@ import { getSingleQuestionData } from "lib/network/loginauth";
 import { RiSaveLine } from "react-icons/ri";
 import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
+import { toast } from "react-toastify";
 import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
 
 const QuestionList = () => {
-  const { questionId, setQuestionId,handleEditQuestionId } = useContext(QuestionContext);
-  const navigate = useNavigate()
+  const { questionId, setQuestionId, handleEditQuestionId } =
+    useContext(QuestionContext);
+  const navigate = useNavigate();
   const [questionList, setQuestionList] = useState([]);
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -47,12 +49,13 @@ const QuestionList = () => {
 
     if (editedQuestion) {
       // If the question is found, set it as the edited question text
-      handleEditQuestionId(editedQuestion.question_id)
+      handleEditQuestionId(editedQuestion.question_id);
       setEditedQuestion(editedQuestion.questions);
       setEditedType(editedQuestion.type);
       setEditOrder(editedQuestion.order_id);
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
+      localStorage.setItem("location", "edit_quiz");
       navigate("/edit-question");
     }
   };
@@ -103,6 +106,34 @@ const QuestionList = () => {
   }, [questionList]);
 
   useEffect(() => {
+    if (localStorage.getItem("isEdited")) {
+      toast.success("Data has been updated successfully", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      localStorage.removeItem("isEdited");
+    } else if (localStorage.getItem("isQuestionAdded")) {
+      toast.success("Data has been added successfully", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      localStorage.removeItem("isQuestionAdded");
+    }
+    if (localStorage.getItem("location")) {
+      localStorage.removeItem("location");
+    }
     getQuestionList();
   }, []);
   const handleTypeChange = (e) => {

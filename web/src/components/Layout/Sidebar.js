@@ -13,6 +13,7 @@ export default function Sidebar({ toggleSidebar }) {
     { name: "Players", url: "/players", icon: userIcon },
     { name: "Add Question", url: "/add-question", icon: userIcon },
     { name: "Questions", url: "/quiz-list", icon: userIcon },
+    // { name: "Questions", url: "/quiz-list", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
   const handleClick = (e) => {
