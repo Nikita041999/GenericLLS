@@ -9,9 +9,11 @@ export default function DeleteModal({
   handleToggleDeleteModal,
   handleDelete,
   module = "User",
+  setDeleteId
 }) {
   const handleClose = () => {
     handleToggleDeleteModal(false);
+    setDeleteId(0)
   };
 
   // console.log("data", data);
@@ -24,9 +26,9 @@ export default function DeleteModal({
       className="info_modal"
     >
       <div className="modal-body text-center">
-        <div className="text-center mb-4">
+        {/* <div className="text-center mb-4">
           <img src={cancelIcon} width="50" alt="delete" />
-        </div>
+        </div> */}
         <h3>Delete {module}</h3>
         <p className="mb-4">
           Are you sure you want to delete this {module.toLocaleLowerCase()}.
@@ -47,13 +49,6 @@ export default function DeleteModal({
         >
           Delete
         </button>
-        {/* <span className="badge bg-primary">
-              <i className="fa-solid fa-check"></i>&nbsp; Activate
-            </span>
-            <br />
-            <span className="badge bg-danger">
-              <i className="fa-solid fa-xmark"></i>&nbsp; Deactivate
-            </span> */}
       </div>
     </Modal>
   );

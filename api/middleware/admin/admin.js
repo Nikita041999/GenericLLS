@@ -1,5 +1,5 @@
 import { getConnection } from "../../db/index.js";
-
+import { wordCorrection } from "../../utils/helper.js";
 import CryptoJS from "crypto-js";
 import { generateJWT } from "../../utils/jwt.js";
 
@@ -73,13 +73,13 @@ export const quizDataAdd = async (req, res) => {
   console.log(Object.keys(req.body).length);
   console.log(req.body);
   let { question, selectField } = req.body;
-  question = question.trim();
+  question = wordCorrection(question)
   Object.entries(req.body).map(async (opt, index) => {
     if (opt[0].includes("option")) {
       const ansOpt = opt[0][opt[0].length - 1];
       if (selectField === ansOpt) {
         // console.log(answer,opt[1]);
-        selectField = opt[1].trim();
+        selectField =wordCorrection(opt[1]);
       }
     }
   });
@@ -105,17 +105,14 @@ export const quizDataAdd = async (req, res) => {
           "select question_id from questions where questions=?";
         //get question id from table
         const q_id = await con.query(q_id_query, [question]);
-        console.log("Object.entries(req.body)>>>>>>", Object.entries(req.body));
         const option_length = Object.entries(req.body).length;
-        console.log("*****q_id****", q_id[0][0].question_id);
-
         Object.entries(req.body).map(async (opt, index) => {
           if (opt[0].includes("option")) {
             //add option with respective question id
             if (index < option_length) {
               await con.query(addOptionQuery, [
                 q_id[0][0].question_id,
-                opt[1].trim(),
+                wordCorrection(opt[1]),
               ]);
             }
           }
@@ -214,7 +211,7 @@ function arraysAreEqual(arr1, arr2) {
 export const editQuestionData = async (req, res) => {
   console.log("--->", req.body);
   let { id, question, options, selectField, option_length } = req.body;
-  question = question.trim();
+  question = wordCorrection(question);
   const updateQuestionQurey = `UPDATE questions
 SET questions = ?
 WHERE question_id = ?;`;
@@ -254,7 +251,7 @@ WHERE question_id = ?;`;
     if (opt[0].includes("option") && opt[0] != "options") {
       const ansOpt = opt[0][opt[0].length - 1];
       if (selectField === ansOpt) {
-        selectField = opt[1].trim();
+        selectField = wordCorrection(opt[1]);
       }
     }
   });
@@ -276,7 +273,7 @@ WHERE question_id = ?;`;
 
       Object.entries(final_option_list).map(async (opt, index) => {
         //add option with respective question id
-        await con.query(addOptionQuery, [id, opt[1].trim()]);
+        await con.query(addOptionQuery, [id, wordCorrection(opt[1])]);
       });
       con.query(optinIdQuery, [id, selectField]).then(async (val) => {
         console.log("val******", val[0][0].option_id);

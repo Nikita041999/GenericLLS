@@ -20,13 +20,14 @@ import { GrAddCircle } from "react-icons/gr";
 import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import {  IoAddCircle} from "react-icons/io5"
+import { IoAddCircle } from "react-icons/io5";
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
     questionId,
     data,
     setData,
+    setQuestionId,
     prevOptAlphabet,
     setOptionAlphabet,
     validationSchema,
@@ -39,16 +40,17 @@ export default function Dashboard() {
     setCorrectAnswerOption,
   } = useContext(QuestionContext);
   // const [data, setData] = useState({});
-  const [isLoading, setLoading] = useState(false);
+  // const [isLoading, setLoading] = useState(false);
   // const [option, setOptions] = useState(null);
   // const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
-  const [selectedOption, setSelectedOption] = useState("");
-  const [deleteOptionId, setDeleteOptionId] = useState("");
+  // const [selectedOption, setSelectedOption] = useState("");
+  // const [deleteOptionId, setDeleteOptionId] = useState("");
   const [initialValues1, setInitialValues1] = useState(initialValues);
-  const [buttonType, setButtonType] = useState("");
+  // const [buttonType, setButtonType] = useState("");
   const [lastIndex, setLastIndex] = useState(0);
   const [validationSchema1, setValidationSchema1] = useState(validationSchema);
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: initialValues1,
     validationSchema: Yup.object(validationSchema1),
     onSubmit: (values, { resetForm }) => {
@@ -57,17 +59,25 @@ export default function Dashboard() {
       values["answer_id"] = data["answer_id"];
       values["correct_option"] = data["correct_option"];
       values["options"] = data["options"];
-      console.log('------------------------>',prevOptAlphabet.length);
-      values['option_length'] = prevOptAlphabet.length
+      console.log("------------------------>", prevOptAlphabet.length);
+      values["option_length"] = prevOptAlphabet.length;
       resetForm({ values: "" });
+
       handleResetNameField();
       editQuestionData(values)
         .then((data) => {
           setOptions(null);
           console.log("dataaaaa", data.message);
           resetForm({ values: "" });
-          localStorage.setItem('isEdited','yes')
+          localStorage.setItem("isEdited", "yes");
           navigate("/quiz-list");
+          setQuestionId(0);
+          setData({});
+          setInitialValues({});
+          setOptions({});
+          setCorrectAnswerOption({});
+          setValidationSchema({});
+          setOptionAlphabet(["A", "B"]);
         })
         .catch((err) => console.log(err));
     },
@@ -139,37 +149,71 @@ export default function Dashboard() {
   };
   useEffect(() => {
     // 'location','edit_quiz'
-    if(! localStorage.getItem('location')){
-      navigate('/quiz-list')
-    }
+    console.log("validationSchema1********",validationSchema1,validationSchema);
+    if (!localStorage.getItem("location")) {
+      navigate("/quiz-list");
+    } 
     getEditQuestionData();
   }, []);
+
+  useEffect(() => {
+    console.log("validationSchema1********",validationSchema1,initialValues1);
+    },[validationSchema1,initialValues1])
 
   const handleInitialOptions = () => {
     let updatedInitialValues = {};
     let updatedValidationSchema = {};
+    // console.log("****8dataaaa****", data);
+    // console.log("***-------------------***", Object.keys(data["options"]));
     Object.keys(data).map((val, i) => {
       if (val == "options") {
+        const tempArr = Object.keys(data["options"]);
         prevOptAlphabet.map((opt, i) => {
-          updatedInitialValues[`option${opt}`] = data["options"][i + 1]; // Add the new key-value pair
-
-          updatedValidationSchema[`option${opt}`] =
-            Yup.string().required(`Please enter option`);
+          updatedInitialValues[`option${opt}`] = data["options"][i]; // Add the new key-value pair
+          const tempOpt = `option${opt}`;
+          console.log("tempOpt", data["options"][tempArr[i]]);
+          formik.values[`${tempOpt}`] = data["options"][tempArr[i]];
+          // formik.values.tempOpt = data["options"][tempArr[i]];
+          updatedValidationSchema[`option${opt}`] = Yup.string()
+            .required(`Please enter option`)
+            .test(
+              "contains-only-spaces",
+              "Option must not contain only spaces",
+              (value) => {
+                return !/^\s+$/.test(value);
+              }
+            );
         });
       } else {
         if (val == "questions") {
+          console.log("vallll", val, data[val]);
           updatedInitialValues["question"] = data[val];
+          updatedValidationSchema[`question`] = Yup.string()
+            .required(`Please enter question`)
+            .test(
+              "contains-only-spaces",
+              "Question must not contain only spaces",
+              (value) => {
+                return !/^\s+$/.test(value);
+              }
+            );
+          formik.values.question = data[val];
         } else if (val == "answer_id") {
           updatedInitialValues["selectField"] = prevOptAlphabet[data[val] - 1];
           data["selectedField"] = prevOptAlphabet[data[val] - 1];
+          updatedValidationSchema[`selectField`] = Yup.string().required(
+            "Please select an option"
+          );
+          formik.values.selectedField = prevOptAlphabet[data[val] - 1];
 
           // updatedInitialValues['selectField'] = data[val];
         }
       }
     });
-
     setInitialValues(updatedInitialValues);
     setValidationSchema(updatedValidationSchema);
+
+    console.log("updatedValidationSchema*****", updatedValidationSchema);
   };
   useEffect(() => {
     if (option > 0) {
@@ -178,18 +222,18 @@ export default function Dashboard() {
   }, [data, option, prevOptAlphabet, lastIndex]);
 
   const handleOptionNumber = () => {
-    setButtonType("add");
+    // setButtonType("add");
     const charCode = prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
     const currentAlphabet = String.fromCharCode(charCode + 1);
     setOptionAlphabet((prev) => [...prev, currentAlphabet]);
     setLastIndex(prevOptAlphabet.length);
     const updatedInitialValues = {
-      ...initialValues, // Spread the existing state
+      ...initialValues1, // Spread the existing state
       [`option${currentAlphabet}`]: "", // Add the new key-value pair
     };
     setInitialValues(updatedInitialValues);
     const updatedValidationSchema = {
-      ...validationSchema,
+      ...validationSchema1,
       [`option${currentAlphabet}`]:
         Yup.string().required(`Please enter option`),
     };
@@ -262,16 +306,16 @@ export default function Dashboard() {
   };
 
   const handleDeleteOption = (alphabet) => {
-    setButtonType("delete");
-    setDeleteOptionId(alphabet);
+    // setButtonType("delete");
+    // setDeleteOptionId(alphabet);
     // if (prevOptAlphabet.length <= option) {
     let updatedOptionArray = prevOptAlphabet;
     const lastAlphabet = updatedOptionArray.pop();
     setOptionAlphabet((prev) => [...updatedOptionArray]);
     setLastIndex(updatedOptionArray.length - 1);
     const charCode = alphabet.charCodeAt(0);
-    const updatedInitialValues = initialValues;
-    const updatedValidationSchema = validationSchema;
+    const updatedInitialValues = initialValues1;
+    const updatedValidationSchema = validationSchema1;
     delete updatedInitialValues[`option${lastAlphabet}`];
     delete updatedValidationSchema[`option${lastAlphabet}`];
     setInitialValues1(updatedInitialValues);
@@ -286,12 +330,16 @@ export default function Dashboard() {
 
   const handleResetNameField = () => {
     // console.log("initialValues******", initialValues);
-    Object.keys(initialValues).map((opt, index) => {
+    Object.keys(initialValues1).map((opt, index) => {
       if (opt.includes("option")) {
         formik.setFieldValue(opt, "");
       }
     });
   };
+
+  // useEffect(() => {
+  //   formik.values.question = data['questions']
+  // },[initialValues])
 
   return (
     <Layout>
@@ -317,12 +365,8 @@ export default function Dashboard() {
                                 cols="50"
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
-                                value={
-                                  formik.values.question
-                                    ? formik.values.question
-                                    : (formik.values.question =
-                                        data["questions"])
-                                }
+                                autoComplete="off"
+                                value={formik.values.question}
                                 className="form-control"
                               />
                               {formik.touched.question &&
@@ -337,10 +381,14 @@ export default function Dashboard() {
                           {prevOptAlphabet?.map((opt, i) => {
                             let a = Object.keys(data["options"]);
                             let currOpt = a[i];
-                            if (i < lastIndex || i<2) {
+                            console.log(
+                              ">>>>currOpt",
+                              data["options"][currOpt]
+                            );
+                            if (i < lastIndex || i < 2) {
                               return (
                                 <div className="col-md-12">
-                                  <TextField
+                                  {/* <TextField
                                     name={`option${prevOptAlphabet[i]}`}
                                     showIcon={false}
                                     placeholder={`option`}
@@ -348,7 +396,41 @@ export default function Dashboard() {
                                     val={data["options"][currOpt]}
                                     // onBlur={formik.handleBlur}
                                     label={`${prevOptAlphabet[i]}`}
+                                  /> */}
+
+                                  <label
+                                    htmlFor={`option${prevOptAlphabet[i]}`}
+                                    className="form-label"
+                                  >
+                                    {`${prevOptAlphabet[i]}`}
+                                  </label>
+                                  <input
+                                    id="question"
+                                    name={`option${prevOptAlphabet[i]}`}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    autoComplete="off"
+                                    value={
+                                      formik.values[
+                                        `option${prevOptAlphabet[i]}`
+                                      ]
+                                    }
+                                    className="form-control"
                                   />
+                                  {formik.touched[
+                                    `option${prevOptAlphabet[i]}`
+                                  ] &&
+                                  formik.errors[
+                                    `option${prevOptAlphabet[i]}`
+                                  ] ? (
+                                    <div className="error">
+                                      {
+                                        formik.errors[
+                                          `option${prevOptAlphabet[i]}`
+                                        ]
+                                      }
+                                    </div>
+                                  ) : null}
                                 </div>
                               );
                             } else {
@@ -358,62 +440,66 @@ export default function Dashboard() {
                                   id={`remove_${prevOptAlphabet[i]}`}
                                 >
                                   <span
+                                    style={{ cursor: "pointer" }}
                                     onClick={() =>
                                       handleDeleteOption(prevOptAlphabet[i])
                                     }
                                   >
                                     <GrSubtractCircle />
                                   </span>
-                                  <TextField
+                                  <label
+                                    htmlFor={`option${prevOptAlphabet[i]}`}
+                                    className="form-label"
+                                  >
+                                    {`${prevOptAlphabet[i]}`}
+                                  </label>
+                                  <input
+                                    id="question"
                                     name={`option${prevOptAlphabet[i]}`}
-                                    showIcon={false}
-                                    placeholder={`option`}
-                                    formik={formik}
-                                    val={
-                                      data["options"][currOpt]
-                                        ? data["options"][currOpt]
-                                        : ""
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    autoComplete="off"
+                                    value={
+                                      formik.values[
+                                        `option${prevOptAlphabet[i]}`
+                                      ]
                                     }
-                                    // onBlur={formik.handleBlur}
-                                    label={`${prevOptAlphabet[i]}`}
+                                    className="form-control"
                                   />
+                                  {formik.touched[
+                                    `option${prevOptAlphabet[i]}`
+                                  ] &&
+                                  formik.errors[
+                                    `option${prevOptAlphabet[i]}`
+                                  ] ? (
+                                    <div className="error">
+                                      {
+                                        formik.errors[
+                                          `option${prevOptAlphabet[i]}`
+                                        ]
+                                      }
+                                    </div>
+                                  ) : null}
                                 </div>
                               );
                             }
                           })}
 
-                          {/* {prevOptAlphabet.length > lastIndex &&
-                            handleAddOptionButtonCLick()} */}
-                          {/* <button
+                          <button
                             onClick={handleOptionNumber}
                             style={{
                               width: "fit-content",
-                              background: "#c5c6d0",
+                              background: "transparent",
                               border: "none",
                               borderRadius: "6px",
-                              color: "white",
+                              fontSize: "1.8rem",
+                              marginTop: "0px",
                             }}
                             type="button"
                             id="add"
                           >
-                            <GrAddCircle />
-                          </button> */}
-
-                          <button
-                          onClick={handleOptionNumber}
-                          style={{
-                            width: "fit-content",
-                            background: "transparent",
-                            border: "none",
-                            borderRadius: "6px",
-                            fontSize: '1.8rem',
-                            marginTop: '0px'
-                          }}
-                          type="button"
-                          id="add"
-                        > 
-                          <IoAddCircle />
-                        </button>
+                            <IoAddCircle />
+                          </button>
 
                           <div className="col-md-12">
                             <label htmlFor="selectField" className="form-label">
@@ -421,6 +507,7 @@ export default function Dashboard() {
                             </label>
                             <select
                               id="selectField"
+                              autoComplete="off"
                               value={
                                 formik.values.selectField
                                   ? formik.values.selectField
@@ -431,6 +518,7 @@ export default function Dashboard() {
                               onChange={formik.handleChange}
                               className="form-control"
                               name="selectField"
+                              style={{ cursor: "pointer" }}
                             >
                               <option value="">Select an option</option>
                               {prevOptAlphabet.map((option, index) => (
@@ -439,12 +527,12 @@ export default function Dashboard() {
                                 </option>
                               ))}
                             </select>
-                            {/* {formik.touched.selectField &&
+                            {formik.touched.selectField &&
                             formik.errors.selectField ? (
                               <div className="error">
                                 {formik.errors.selectField}
                               </div>
-                            ) : null} */}
+                            ) : null}
                           </div>
 
                           <div

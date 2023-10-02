@@ -13,7 +13,7 @@ import { quizDataAdd } from "lib/network/loginauth";
 import addIcon from "assets/images/add_icon.svg";
 import { GrSubtractCircle } from "react-icons/gr";
 // import { GrAddCircle} from "react-icons/gr"
-import {  IoAddCircle} from "react-icons/io5"
+import { IoAddCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const initialValues1 = {
@@ -23,13 +23,38 @@ export default function Dashboard() {
     optionB: "",
   };
   const validationSchema1 = {
-    question: Yup.string().required("Please enter question"),
-    selectField: Yup.string().required('Please select an option'),
+    question: Yup.string()
+      .required("Please enter question")
+      .test(
+        "contains-only-spaces",
+        "Question must not contain only spaces",
+        (value) => {
+          return !/^\s+$/.test(value);
+        }
+      ),
+
+    selectField: Yup.string().required("Please select an option"),
     // .oneOf(validOptions, 'Invalid option selected'),
-    optionA: Yup.string().required("Please enter option"),
-    optionB: Yup.string().required("Please enter option"),
+    optionA: Yup.string()
+      .required("Please enter option")
+      .test(
+        "contains-only-spaces",
+        "Option must not contain only spaces",
+        (value) => {
+          return !/^\s+$/.test(value);
+        }
+      ),
+    optionB: Yup.string()
+      .required("Please enter option")
+      .test(
+        "contains-only-spaces",
+        "Option must not contain only spaces",
+        (value) => {
+          return !/^\s+$/.test(value);
+        }
+      ),
   };
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [data, setData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [option, setOptions] = useState(null);
@@ -43,7 +68,7 @@ export default function Dashboard() {
     // console.log("options******", option);
   }, [option]);
   useEffect(() => {
-  localStorage.setItem('location','add_question')
+    localStorage.setItem("location", "add_question");
   }, []);
 
   const formik = useFormik({
@@ -56,14 +81,14 @@ export default function Dashboard() {
       resetForm({ values: "" });
 
       handleResetNameField();
-      console.log('values',values);
+      console.log("values", values);
       quizDataAdd(values)
         .then((data) => {
           console.log("data------>", data);
           setOptions(null);
           resetForm({ values: "" });
-          localStorage.setItem('isQuestionAdded','yes')
-          navigate('/quiz-list')
+          localStorage.setItem("isQuestionAdded", "yes");
+          navigate("/quiz-list");
         })
         .catch((err) => console.log(err));
       console.log("***************** inside login fn 2", values);
@@ -87,9 +112,8 @@ export default function Dashboard() {
     const updatedValidationSchema = {
       ...validationSchema,
       // ...validationSchema1,
-      [`option${currentAlphabet}`]: Yup.string().required(
-        `Please enter option`
-      ),
+      [`option${currentAlphabet}`]:
+        Yup.string().required(`Please enter option`),
     };
     setValidationSchema(updatedValidationSchema);
   };
@@ -142,17 +166,39 @@ export default function Dashboard() {
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
             >
-              <span onClick={() => handleDeleteOption(alphabet)}>
+              <span
+                onClick={() => handleDeleteOption(alphabet)}
+                style={{ cursor: "pointer" }}
+              >
                 <GrSubtractCircle />
               </span>
-              <TextField
+              {/* <TextField
                 name={`option${alphabet}`}
                 showIcon={false}
                 placeholder={`option`}
                 formik={formik}
                 // onBlur={formik.handleBlur}
                 label={`${alphabet}`}
+              /> */}
+
+              <label htmlFor={`option${alphabet}`} className="form-label">
+                {`${alphabet}`}
+              </label>
+              <input
+                id="question"
+                name={`option${alphabet}`}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                autoComplete="off"
+                value={formik.values[`option${alphabet}`]}
+                className="form-control"
               />
+              {formik.touched[`option${alphabet}`] &&
+              formik.errors[`option${alphabet}`] ? (
+                <div className="error">
+                  {formik.errors[`option${alphabet}`]}
+                </div>
+              ) : null}
             </div>
           );
         } else {
@@ -161,14 +207,24 @@ export default function Dashboard() {
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
             >
-              <TextField
+              <label htmlFor={`option${alphabet}`} className="form-label">
+                {`${alphabet}`}
+              </label>
+              <input
+                id="question"
                 name={`option${alphabet}`}
-                showIcon={false}
-                placeholder={`option`}
-                formik={formik}
-                // onBlur={formik.handleBlur}
-                label={`${alphabet}`}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                autoComplete="off"
+                value={formik.values[`option${alphabet}`]}
+                className="form-control"
               />
+              {formik.touched[`option${alphabet}`] &&
+              formik.errors[`option${alphabet}`] ? (
+                <div className="error">
+                  {formik.errors[`option${alphabet}`]}
+                </div>
+              ) : null}
             </div>
           );
         }
@@ -278,6 +334,7 @@ export default function Dashboard() {
                               id="question"
                               name="question"
                               rows="4"
+                              autoComplete="off"
                               cols="50"
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
@@ -294,23 +351,44 @@ export default function Dashboard() {
                         </div>
 
                         <div className="col-md-12">
-                          <TextField
+                          <label htmlFor={`optionA`} className="form-label">
+                            {`A`}
+                          </label>
+                          <input
+                            id="question"
                             name={`optionA`}
-                            showIcon={false}
-                            placeholder={`option`}
-                            formik={formik}
-                            label={`A`}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            autoComplete="off"
+                            value={formik.values[`optionA`]}
+                            className="form-control"
                           />
+                          {formik.touched[`optionA`] &&
+                          formik.errors[`optionA`] ? (
+                            <div className="error">
+                              {formik.errors[`optionA`]}
+                            </div>
+                          ) : null}
                         </div>
                         <div className="col-md-12">
-                          <TextField
+                          <label htmlFor={`optionB`} className="form-label">
+                            {`B`}
+                          </label>
+                          <input
+                            id="question"
                             name={`optionB`}
-                            showIcon={false}
-                            placeholder={`option`}
-                            formik={formik}
-                            // onBlur={formik.handleBlur}
-                            label={`B`}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            autoComplete="off"
+                            value={formik.values[`optionB`]}
+                            className="form-control"
                           />
+                          {formik.touched[`optionB`] &&
+                          formik.errors[`optionB`] ? (
+                            <div className="error">
+                              {formik.errors[`optionB`]}
+                            </div>
+                          ) : null}
                         </div>
                         {prevOptAlphabet.length > 2 &&
                           handleAddOptionButtonCLick()}
@@ -321,12 +399,12 @@ export default function Dashboard() {
                             background: "transparent",
                             border: "none",
                             borderRadius: "6px",
-                            fontSize: '1.8rem',
-                            marginTop: '0px'
+                            fontSize: "1.8rem",
+                            marginTop: "0px",
                           }}
                           type="button"
                           id="add"
-                        > 
+                        >
                           <IoAddCircle />
                         </button>
 
@@ -341,6 +419,8 @@ export default function Dashboard() {
                             onChange={formik.handleChange}
                             className="form-control"
                             name="selectField"
+                            autoComplete="off"
+                            style={{ cursor: "pointer" }}
                           >
                             <option value="">Select an option</option>
                             {prevOptAlphabet.map((option, index) => (
@@ -350,11 +430,11 @@ export default function Dashboard() {
                             ))}
                           </select>
                           {formik.touched.selectField &&
-                            formik.errors.selectField ? (
-                              <div className="error">
-                                {formik.errors.selectField}
-                              </div>
-                            ) : null}
+                          formik.errors.selectField ? (
+                            <div className="error">
+                              {formik.errors.selectField}
+                            </div>
+                          ) : null}
                         </div>
 
                         <div
@@ -363,7 +443,7 @@ export default function Dashboard() {
                           <button
                             className="btn btn-primary text-center"
                             type="submit"
-                            styles={{background:'#E60200'}}
+                            styles={{ background: "#E60200" }}
                             // disabled={loading}
                           >
                             Submit

@@ -13,7 +13,6 @@ export default function TextField({
   showIcon,
   icon,
   label,
-  val
 }) {
   return (
     <div className="position-relative">
@@ -38,7 +37,7 @@ export default function TextField({
           placeholder={placeholder}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          value={type == "password" ? undefined : formik.values[name]?formik.values[name]:formik.values[name] = val}
+          value={type == "password" ? undefined : formik.values[name]}
           name={name}
         />
         {formik.touched[name] && formik.errors[name] ? (

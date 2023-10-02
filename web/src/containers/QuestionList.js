@@ -8,8 +8,8 @@ import styles from "./AdminStyles.module.css";
 import Loader from "components/Loader";
 import { MdEdit, MdDataSaverOn } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
-import {RiDeleteBin2Fill} from "react-icons/ri"
-import {RiEdit2Fill} from "react-icons/ri"
+import { RiDeleteBin2Fill } from "react-icons/ri";
+import { RiEdit2Fill } from "react-icons/ri";
 import { getSingleQuestionData } from "lib/network/loginauth";
 import { RiSaveLine } from "react-icons/ri";
 import questionListSvg from "assets/images/multi-picklist.svg";
@@ -18,6 +18,8 @@ import { deleteQuizData } from "lib/network/loginauth";
 import { toast } from "react-toastify";
 import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
+import DeleteModal from "components/Modals/DeleteModal";
+import { Modal } from "react-bootstrap";
 
 const QuestionList = () => {
   const { questionId, setQuestionId, handleEditQuestionId } =
@@ -28,6 +30,8 @@ const QuestionList = () => {
   const [isLoading, setLoading] = useState(false);
   const [editedType, setEditedType] = useState("");
   const [editOrder, setEditOrder] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(0);
   // Add a new state variable to track the edited question text
   const [editedQuestion, setEditedQuestion] = useState("");
   const [editingQuestionId, setEditingQuestionId] = useState(null);
@@ -59,7 +63,7 @@ const QuestionList = () => {
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
       localStorage.setItem("location", "edit_quiz");
-      navigate("/edit-question");
+      navigate(`/edit-question?id=${editedQuestion.question_id}`);
     }
   };
   const handleQuestionSave = () => {
@@ -89,28 +93,43 @@ const QuestionList = () => {
     const editedQuestionIndex = questionList.findIndex(
       (user, index) => index + 1 === tableId
     );
+    // setShowModal(!showModal)
     console.log(editedQuestionIndex, questionList[editedQuestionIndex]);
     const { question_id: id } = questionList[editedQuestionIndex];
     console.log("id", id);
-    const value = {
-      id,
-    };
-    deleteQuizData(value)
-      .then((data) => {
-        console.log("message--->", data);
-        getQuestionList();
-      })
-      .catch((err) => {
-        console.log("errr-> ", err);
-      });
+    // const value = {
+    //   id,
+    // };
+    setDeleteId(id);
+    // deleteQuizData(value)
+    //   .then((data) => {
+    //     console.log("message--->", data);
+    //     getQuestionList();
+    //   })
+    //   .catch((err) => {
+    //     console.log("errr-> ", err);
+    //   });
   };
+
+  useEffect(() => {
+    console.log("-------->",deleteId);
+    if(deleteId>0){
+      setShowModal(true);
+    }
+  }, [deleteId]);
   useEffect(() => {
     console.log("quesList--->", questionList);
   }, [questionList]);
+  // useEffect(() => {
+
+  //   if(showModal){
+
+  //   }
+  // },[showModal])
 
   useEffect(() => {
     if (localStorage.getItem("isEdited")) {
-      toast.success("Data has been updated successfully", {
+      toast.success("Question data has been updated successfully", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -122,7 +141,7 @@ const QuestionList = () => {
       });
       localStorage.removeItem("isEdited");
     } else if (localStorage.getItem("isQuestionAdded")) {
-      toast.success("Data has been added successfully", {
+      toast.success("Question data has been added successfully", {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -149,6 +168,27 @@ const QuestionList = () => {
     setEditOrder(e.target.value);
   };
 
+  const handleDelete = () => {
+    console.log("delete clicked");
+    const value = {
+      id: deleteId
+    }
+    deleteQuizData(value)
+      .then((data) => {
+        console.log("message--->", data);
+        getQuestionList();
+        setShowModal(false);
+        setDeleteId(0)
+      })
+      .catch((err) => {
+        console.log("errr-> ", err);
+      });
+  };
+  const handleToggleDeleteModal = (state) => {
+    setShowModal(state);
+    // setDeleteId(0)
+  };
+
   const getList = () => {
     if (isLoading) {
       return (
@@ -172,19 +212,18 @@ const QuestionList = () => {
                   <button
                     style={{
                       background: "transparent",
-                      fontSize:'1.3rem'
+                      fontSize: "1.3rem",
                     }}
                     onClick={(e) => handleQuestionEdit(e, i + 1)}
                   >
                     <RiEdit2Fill
-                      // width={200}
-                      // onClick={(e) => handleQuestionEdit(e, i + 1)}
+                    // width={200}
                     />
                   </button>
                   <button
                     style={{
                       background: "transparent",
-                      fontSize:'1.3rem'
+                      fontSize: "1.3rem",
                     }}
                     onClick={(e) => handleQuestionDelete(e, i + 1)}
                   >
@@ -228,54 +267,8 @@ const QuestionList = () => {
                         </div>
                       </div>
                     </a>
-                    {/* <a href="/users" style={{ marginLeft: "1rem" }}>
-                      <div className="card_dash mb-3">
-                        <div className="cardinfo">
-                          <label>Total Quizes Conducted</label>
-                          <strong></strong>
-                        </div>
-                        <div className="cardIcon">
-                          <img src={userSvg} alt="icon" />
-                        </div>
-                      </div>
-                    </a> */}
                   </div>
-                  {/* <ul>
-                    {questionList?.map((ques, index) => {
-                      return (
-                        <li key={index} className={styles.question_warpper}>
-                          <div>
-                            <div>
-                              {" "}
-                              <span style={{ marginRight: "0.5rem" }}>{`${
-                                index + 1
-                              }. `}</span>{" "}
-                              {ques.questions}
-                            </div>
-                            <div className={`${styles.button_wrapper}`}>
-                              <button
-                                style={{
-                                  background: "#c5c6d0",
-                                  color: "#333333",
-                                }}
-                                onClick={handleQuestionEdit}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                style={{
-                                  background: "#202320",
-                                  color: "#c5c6d0",
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>{" "}
-                        </li>
-                      );
-                    })}
-                  </ul> */}
+
                   <div className="table-responsive">
                     <table className="table">
                       <thead>
@@ -305,6 +298,15 @@ const QuestionList = () => {
           </div>
         </div>
       </main>
+      {showModal===true && (
+        <DeleteModal
+          showModal={showModal}
+          handleToggleDeleteModal={handleToggleDeleteModal}
+          handleDelete={handleDelete}
+          module={"Question"}
+          setDeleteId = {setDeleteId}
+        />
+      )}
     </Layout>
   );
 };

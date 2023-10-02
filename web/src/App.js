@@ -33,7 +33,7 @@ import AddQuestion from "components/TradeshowComps/AddQuestion";
 import Dashboard from "containers/Dashboard";
 import QuestionList from "containers/QuestionList";
 import { QuestionProvider } from "lib/contexts/questionContext";
-import EditQuestion from "../src/containers/EditQuestion"
+import EditQuestion from "../src/containers/EditQuestion";
 // import { GoogleLoginButton } from "react-social-login-buttons";
 
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
@@ -64,17 +64,17 @@ function App() {
   return (
     <div className="">
       <audio ref={audioRef} src={audioFile} autoPlay />
-      <AdminProvider>
-        <UserProvider>
-          <QuestionProvider>
-            <ToastContainer
-              autoClose={10000}
-              hideProgressBar
-              theme="colored"
-              className="toast-container"
-            />
+      <BrowserRouter>
+        <AdminProvider>
+          <UserProvider>
+            <QuestionProvider>
+              <ToastContainer
+                autoClose={10000}
+                hideProgressBar
+                theme="colored"
+                className="toast-container"
+              />
 
-            <BrowserRouter>
               <Routes>
                 {/* <Route
               path="/"
@@ -118,7 +118,7 @@ function App() {
                     </AdminProtectedRoute>
                   }
                 />
-                 <Route
+                <Route
                   path="/edit-question"
                   element={
                     <AdminProtectedRoute>
@@ -215,10 +215,10 @@ function App() {
                   }
                 />
               </Routes>
-            </BrowserRouter>
-          </QuestionProvider>
-        </UserProvider>
-      </AdminProvider>
+            </QuestionProvider>
+          </UserProvider>
+        </AdminProvider>
+      </BrowserRouter>
     </div>
   );
 }
