@@ -13,8 +13,9 @@ export const QuestionProvider = ({ children }) => {
   const [option, setOptions] = useState(null);
   const [correctAnswerOption,setCorrectAnswerOption] = useState('')
   let [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation()
   const handleEditQuestionId = (id) => {
-    console.log("*****it is id",id);
+    console.log("***** id is     ",id);
     setQuestionId(id);
     //   const queryParams = new URLSearchParams(location.id);
     // console.log("queryParams*****",queryParams);
@@ -30,10 +31,10 @@ export const QuestionProvider = ({ children }) => {
         let result = {};
         let opts = {};
         // Iterate through the data array
-        console.log('*****************',data.data.data);
+        console.log('********data from api*********',data.data.data);
         for (const item of data.data.data) {
           Object.keys(item).map((vals, i) => {
-            console.log(">>>>>valesssss****",item);
+            // console.log(">>>>>valesssss****",item);
             if (vals == "option_id" || vals == "options") {
               // Check if the optionId already exists in the result object
               if (result.hasOwnProperty("options")) {
@@ -67,21 +68,21 @@ export const QuestionProvider = ({ children }) => {
           }
         }
         setOptionAlphabet([...TempArr]);
-        console.log("------->",result["options"],result["answer_id"]);
+        // console.log("------->",result["options"],result["answer_id"]);
         Object.keys(result["options"]).map((opt, i) => {
-          console.log("***opt,answerid****",opt,result["answer_id"],typeof opt,typeof (result["answer_id"]),opt == result["answer_id"]);
+          // console.log("***opt,answerid****",opt,result["answer_id"],typeof opt,typeof (result["answer_id"]),opt == result["answer_id"]);
           const a = result["answer_id"]
           if (parseInt(opt) == parseInt(a)) {
-            console.log("TempArr[i]",TempArr[i]);
+            // console.log("TempArr[i]",TempArr[i]);
             const charCode = TempArr[i].charCodeAt(0);
             const currentAlphabet = String.fromCharCode(charCode);
-            console.log('-->',currentAlphabet);
+            // console.log('-->',currentAlphabet);
             setCorrectAnswerOption(currentAlphabet)
-            result["correct_option"] = currentAlphabet;
+            // result["correct_option"] = currentAlphabet;
           }
         });
 
-        console.log("resuulttt****",result);
+        // console.log("resuulttt****",result);
 
         // let updatedInitialValues = {};
         // let updatedValidationSchema = {};
@@ -132,13 +133,13 @@ export const QuestionProvider = ({ children }) => {
   const handleInitialOptions = () => {
     let updatedInitialValues = {};
     let updatedValidationSchema = {};
-    console.log('data.....',data);
+    // console.log('data.....',data);
     Object.keys(data).map((val, i) => {
-      console.log('val',val);
+      // console.log('val',val);
       if (val == "options") {
         prevOptAlphabet.map((opt, i) => {
           const option_id = Object.keys(data["options"])[i]
-          console.log("**initial options***",data["options"][option_id]);
+          // console.log("**initial options***",data["options"][option_id]);
           updatedInitialValues[`option${opt}`] = data["options"][option_id]; // Add the 
           updatedValidationSchema[`option${opt}`] =
             Yup.string().required(`Please enter option`).test(
@@ -161,7 +162,7 @@ export const QuestionProvider = ({ children }) => {
               }
             );
         } else if (val == "answer_id") {
-          console.log("data answer_id *******",data["answer_id"],prevOptAlphabet.indexOf(correctAnswerOption));
+          // console.log("data answer_id *******",data["answer_id"],prevOptAlphabet.indexOf(correctAnswerOption));
           updatedInitialValues["selectField"] = correctAnswerOption;
           data["selectedField"] = correctAnswerOption;
           updatedValidationSchema[`selectField`] = Yup.string().required("Please select an option")
@@ -169,18 +170,17 @@ export const QuestionProvider = ({ children }) => {
         }
       }
     });
-    console.log("updatedInitialValues=======>",updatedInitialValues);
+    // console.log("updatedInitialValues=======>",updatedInitialValues);
     setInitialValues(updatedInitialValues);
     setValidationSchema(updatedValidationSchema);
   };
   useEffect(() => {
-    console.log("queryParams in questionId*****",searchParams.get('id'));
     // handleEditQuestionId(searchParams.get('id'))
     getEditQuestionData();
   }, [questionId]);
 
   useEffect(() => {
-    console.log("queryParams in []*****",searchParams.get('id'),questionId);
+    console.log("queryParams in []*****",location);
     if(searchParams.get('id') != 'null'){
       console.log("***searchParams.get('id')***",searchParams.get('id'));
       handleEditQuestionId(searchParams.get('id'))
@@ -189,15 +189,11 @@ export const QuestionProvider = ({ children }) => {
     // const queryParams = new URLSearchParams(location.id);
   },[])
   useEffect(() => {
-    console.log("data,option,prevOptAlphabet====>",data,option,prevOptAlphabet);
+    // console.log("data,option,prevOptAlphabet====>",data,option,prevOptAlphabet);
     if (option > 0 && Object.keys(data).length>0) {
       handleInitialOptions();
     }
   }, [data, option, prevOptAlphabet]);
-
-useEffect(() => {
-console.log("validationSchema********",initialValues,validationSchema);
-},[validationSchema,initialValues])
 
   return (
     <QuestionContext.Provider

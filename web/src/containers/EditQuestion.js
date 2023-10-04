@@ -21,45 +21,39 @@ import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IoAddCircle } from "react-icons/io5";
+import { useLocation } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
-  const {
-    questionId,
-    data,
-    setData,
-    setQuestionId,
-    prevOptAlphabet,
-    setOptionAlphabet,
-    validationSchema,
-    setValidationSchema,
-    initialValues,
-    setInitialValues,
-    option,
-    setOptions,
-    correctAnswerOption,
-    setCorrectAnswerOption,
-  } = useContext(QuestionContext);
+  // const {
+  //   questionId,
+  // } = useContext(QuestionContext);
   // const [data, setData] = useState({});
   // const [isLoading, setLoading] = useState(false);
   // const [option, setOptions] = useState(null);
   // const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
   // const [selectedOption, setSelectedOption] = useState("");
   // const [deleteOptionId, setDeleteOptionId] = useState("");
-  const [initialValues1, setInitialValues1] = useState(initialValues);
+  // const [initialValues, setInitialValues1] = useState(initialValues);
+  const [questionId, setQuestionId] = useState(0);
+  const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
+  const [validationSchema, setValidationSchema] = useState({});
+  const [initialValues, setInitialValues] = useState({});
+  const [data, setData] = useState({});
+  const [option, setOptions] = useState(null);
+  const [correctAnswerOption, setCorrectAnswerOption] = useState("");
   // const [buttonType, setButtonType] = useState("");
   const [lastIndex, setLastIndex] = useState(0);
-  const [validationSchema1, setValidationSchema1] = useState(validationSchema);
+  const location = useLocation();
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: initialValues1,
-    validationSchema: Yup.object(validationSchema1),
+    initialValues: initialValues,
+    validationSchema: Yup.object(validationSchema),
     onSubmit: (values, { resetForm }) => {
-      console.log("valuesss--->", values, data["question_id"]);
+      // console.log("valuesss--->", values, data["question_id"]);
       values["id"] = data["question_id"];
       values["answer_id"] = data["answer_id"];
       values["correct_option"] = data["correct_option"];
       values["options"] = data["options"];
-      console.log("------------------------>", prevOptAlphabet.length);
       values["option_length"] = prevOptAlphabet.length;
       resetForm({ values: "" });
 
@@ -92,23 +86,19 @@ export default function Dashboard() {
         let result = {};
         let opts = {};
         // Iterate through the data array
+        // console.log("********data from api*********", data.data.data);
         for (const item of data.data.data) {
-          //   console.log("itemmm", item.option_id);
           Object.keys(item).map((vals, i) => {
-            const optionId = item.option_id;
-            const options = item.options;
+            // console.log(">>>>>valesssss****",item);
             if (vals == "option_id" || vals == "options") {
               // Check if the optionId already exists in the result object
               if (result.hasOwnProperty("options")) {
-                // Append the options to the existing array
-                // result[vals].push(item[vals]);
                 if (!opts.hasOwnProperty(opts[item["option_id"]])) {
                   opts[item["option_id"]] = item["options"];
                   result["options"] = opts;
                 }
               } else {
                 // Create a new array for the optionId and add the options
-                // result[vals] = [item[vals]];
                 if (vals == "option_id") {
                   opts[item["option_id"]] = item["options"];
                   result["options"] = opts;
@@ -123,7 +113,6 @@ export default function Dashboard() {
             }
           });
         }
-
         setOptions(Object.keys(result["options"]).length);
         let TempArr = [...prevOptAlphabet];
         if (Object.keys(result["options"]).length > TempArr.length) {
@@ -133,47 +122,47 @@ export default function Dashboard() {
             TempArr.push(currentAlphabet);
           }
         }
-        setLastIndex(TempArr.length - 1);
         setOptionAlphabet([...TempArr]);
         Object.keys(result["options"]).map((opt, i) => {
-          if (opt == result["answer_id"]) {
+          const a = result["answer_id"];
+          if (parseInt(opt) == parseInt(a)) {
             const charCode = TempArr[i].charCodeAt(0);
             const currentAlphabet = String.fromCharCode(charCode);
-            result["correct_option"] = currentAlphabet;
+            setCorrectAnswerOption(currentAlphabet);
+            // result["correct_option"] = currentAlphabet;
           }
         });
         setData(result);
-        console.log(">>>>", result);
       })
       .catch((err) => console.log("------->", err));
   };
   useEffect(() => {
-    // 'location','edit_quiz'
-    console.log("validationSchema1********",validationSchema1,validationSchema);
+    const id = parseInt(location.search.split("=")[1]);
+    if (localStorage.getItem("question_id") == location.search.split("=")[1]) {
+      setQuestionId(id);
+    } else {
+      navigate("/quiz-list");
+    }
     if (!localStorage.getItem("location")) {
       navigate("/quiz-list");
-    } 
-    getEditQuestionData();
+    }
   }, []);
 
   useEffect(() => {
-    console.log("validationSchema1********",validationSchema1,initialValues1);
-    },[validationSchema1,initialValues1])
+    if (questionId > 0) {
+      getEditQuestionData();
+    }
+  }, [questionId]);
 
   const handleInitialOptions = () => {
     let updatedInitialValues = {};
     let updatedValidationSchema = {};
-    // console.log("****8dataaaa****", data);
-    // console.log("***-------------------***", Object.keys(data["options"]));
     Object.keys(data).map((val, i) => {
       if (val == "options") {
         const tempArr = Object.keys(data["options"]);
         prevOptAlphabet.map((opt, i) => {
-          updatedInitialValues[`option${opt}`] = data["options"][i]; // Add the new key-value pair
+          updatedInitialValues[`option${opt}`] = data["options"][tempArr[i]]; // Add the new key-value pair
           const tempOpt = `option${opt}`;
-          console.log("tempOpt", data["options"][tempArr[i]]);
-          formik.values[`${tempOpt}`] = data["options"][tempArr[i]];
-          // formik.values.tempOpt = data["options"][tempArr[i]];
           updatedValidationSchema[`option${opt}`] = Yup.string()
             .required(`Please enter option`)
             .test(
@@ -186,7 +175,6 @@ export default function Dashboard() {
         });
       } else {
         if (val == "questions") {
-          console.log("vallll", val, data[val]);
           updatedInitialValues["question"] = data[val];
           updatedValidationSchema[`question`] = Yup.string()
             .required(`Please enter question`)
@@ -197,29 +185,33 @@ export default function Dashboard() {
                 return !/^\s+$/.test(value);
               }
             );
-          formik.values.question = data[val];
+          // formik.values.question = data[val];
         } else if (val == "answer_id") {
           updatedInitialValues["selectField"] = prevOptAlphabet[data[val] - 1];
           data["selectedField"] = prevOptAlphabet[data[val] - 1];
           updatedValidationSchema[`selectField`] = Yup.string().required(
-            "Please select an option"
+            "Please select a correct option"
           );
-          formik.values.selectedField = prevOptAlphabet[data[val] - 1];
+          // formik.values.selectedField = prevOptAlphabet[data[val] - 1];
 
           // updatedInitialValues['selectField'] = data[val];
         }
       }
     });
+    console.log("****updatedInitialValues**", updatedInitialValues);
     setInitialValues(updatedInitialValues);
     setValidationSchema(updatedValidationSchema);
-
-    console.log("updatedValidationSchema*****", updatedValidationSchema);
   };
   useEffect(() => {
     if (option > 0) {
+      console.log("when data updated", option, data);
       handleInitialOptions();
     }
   }, [data, option, prevOptAlphabet, lastIndex]);
+  useEffect(() => {
+    console.log("--initialValues1-->", initialValues);
+    formik.resetForm(initialValues);
+  }, [initialValues]);
 
   const handleOptionNumber = () => {
     // setButtonType("add");
@@ -228,12 +220,12 @@ export default function Dashboard() {
     setOptionAlphabet((prev) => [...prev, currentAlphabet]);
     setLastIndex(prevOptAlphabet.length);
     const updatedInitialValues = {
-      ...initialValues1, // Spread the existing state
+      ...initialValues, // Spread the existing state
       [`option${currentAlphabet}`]: "", // Add the new key-value pair
     };
     setInitialValues(updatedInitialValues);
     const updatedValidationSchema = {
-      ...validationSchema1,
+      ...validationSchema,
       [`option${currentAlphabet}`]:
         Yup.string().required(`Please enter option`),
     };
@@ -260,66 +252,20 @@ export default function Dashboard() {
         />
       </div>
     );
-    // } else {
-    //   return prevOptAlphabet.map((alphabet, index) => {
-    //     console.log("***************", index, lastIndex);
-    //     if (index > option - 1) {
-    //       if (index == prevOptAlphabet.length - 1) {
-    //         return (
-    //           <div
-    //             className={`col-md-12 ${styles.list_box_wrapper}`}
-    //             id={`remove_${alphabet}`}
-    //           >
-    //             <span onClick={() => handleDeleteOption(alphabet)}>
-    //               <GrSubtractCircle />
-    //             </span>
-    //             <TextField
-    //               name={`option${alphabet}`}
-    //               showIcon={false}
-    //               placeholder={`option`}
-    //               formik={formik}
-    //               // onBlur={formik.handleBlur}
-    //               label={`${alphabet}`}
-    //             />
-    //           </div>
-    //         );
-    //       } else {
-    //         return (
-    //           <div
-    //             className={`col-md-12 ${styles.list_box_wrapper}`}
-    //             id={`remove_${alphabet}`}
-    //           >
-    //             <TextField
-    //               name={`option${alphabet}`}
-    //               showIcon={false}
-    //               placeholder={`option`}
-    //               formik={formik}
-    //               // onBlur={formik.handleBlur}
-    //               label={`${alphabet}`}
-    //             />
-    //           </div>
-    //         );
-    //       }
-    //     }
-    //   });
-    // }
   };
 
   const handleDeleteOption = (alphabet) => {
-    // setButtonType("delete");
-    // setDeleteOptionId(alphabet);
-    // if (prevOptAlphabet.length <= option) {
     let updatedOptionArray = prevOptAlphabet;
     const lastAlphabet = updatedOptionArray.pop();
     setOptionAlphabet((prev) => [...updatedOptionArray]);
     setLastIndex(updatedOptionArray.length - 1);
     const charCode = alphabet.charCodeAt(0);
-    const updatedInitialValues = initialValues1;
-    const updatedValidationSchema = validationSchema1;
+    const updatedInitialValues = initialValues;
+    const updatedValidationSchema = validationSchema;
     delete updatedInitialValues[`option${lastAlphabet}`];
     delete updatedValidationSchema[`option${lastAlphabet}`];
-    setInitialValues1(updatedInitialValues);
-    setValidationSchema1(updatedValidationSchema);
+    setInitialValues(updatedInitialValues);
+    setValidationSchema(updatedValidationSchema);
     setOptions(option - 1);
     let del_id = Object.keys(data["options"]);
     const val = del_id[del_id.length - 1];
@@ -330,16 +276,14 @@ export default function Dashboard() {
 
   const handleResetNameField = () => {
     // console.log("initialValues******", initialValues);
-    Object.keys(initialValues1).map((opt, index) => {
+    Object.keys(initialValues).map((opt, index) => {
       if (opt.includes("option")) {
         formik.setFieldValue(opt, "");
       }
     });
   };
 
-  // useEffect(() => {
-  //   formik.values.question = data['questions']
-  // },[initialValues])
+ 
 
   return (
     <Layout>
@@ -367,6 +311,7 @@ export default function Dashboard() {
                                 onBlur={formik.handleBlur}
                                 autoComplete="off"
                                 value={formik.values.question}
+                                // onClick={handleQuestionResetForm}
                                 className="form-control"
                               />
                               {formik.touched.question &&
@@ -380,23 +325,10 @@ export default function Dashboard() {
 
                           {prevOptAlphabet?.map((opt, i) => {
                             let a = Object.keys(data["options"]);
-                            let currOpt = a[i];
-                            console.log(
-                              ">>>>currOpt",
-                              data["options"][currOpt]
-                            );
+            
                             if (i < lastIndex || i < 2) {
                               return (
                                 <div className="col-md-12">
-                                  {/* <TextField
-                                    name={`option${prevOptAlphabet[i]}`}
-                                    showIcon={false}
-                                    placeholder={`option`}
-                                    formik={formik}
-                                    val={data["options"][currOpt]}
-                                    // onBlur={formik.handleBlur}
-                                    label={`${prevOptAlphabet[i]}`}
-                                  /> */}
 
                                   <label
                                     htmlFor={`option${prevOptAlphabet[i]}`}
@@ -503,7 +435,7 @@ export default function Dashboard() {
 
                           <div className="col-md-12">
                             <label htmlFor="selectField" className="form-label">
-                              Select an option:
+                              Select a correct option:
                             </label>
                             <select
                               id="selectField"

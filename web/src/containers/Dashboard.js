@@ -410,7 +410,7 @@ export default function Dashboard() {
 
                         <div className="col-md-12">
                           <label htmlFor="selectField" className="form-label">
-                            Select an option:
+                            Select a correct option:
                           </label>
                           <select
                             id="selectField"

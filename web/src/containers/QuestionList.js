@@ -56,13 +56,15 @@ const QuestionList = () => {
 
     if (editedQuestion) {
       // If the question is found, set it as the edited question text
-      handleEditQuestionId(editedQuestion.question_id);
+      // handleEditQuestionId(editedQuestion.question_id);
       setEditedQuestion(editedQuestion.questions);
       setEditedType(editedQuestion.type);
       setEditOrder(editedQuestion.order_id);
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
       localStorage.setItem("location", "edit_quiz");
+      console.log("editedQuestion.questionId",editedQuestion.question_id);
+      localStorage.setItem("question_id", editedQuestion.question_id)
       navigate(`/edit-question?id=${editedQuestion.question_id}`);
     }
   };
@@ -117,15 +119,6 @@ const QuestionList = () => {
       setShowModal(true);
     }
   }, [deleteId]);
-  useEffect(() => {
-    console.log("quesList--->", questionList);
-  }, [questionList]);
-  // useEffect(() => {
-
-  //   if(showModal){
-
-  //   }
-  // },[showModal])
 
   useEffect(() => {
     if (localStorage.getItem("isEdited")) {
@@ -155,6 +148,7 @@ const QuestionList = () => {
     }
     if (localStorage.getItem("location")) {
       localStorage.removeItem("location");
+      localStorage.removeItem("question_id")
     }
     getQuestionList();
   }, []);
