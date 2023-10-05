@@ -24,24 +24,14 @@ import { IoAddCircle } from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
-  // const {
-  //   questionId,
-  // } = useContext(QuestionContext);
-  // const [data, setData] = useState({});
-  // const [isLoading, setLoading] = useState(false);
-  // const [option, setOptions] = useState(null);
-  // const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
-  // const [selectedOption, setSelectedOption] = useState("");
-  // const [deleteOptionId, setDeleteOptionId] = useState("");
-  // const [initialValues, setInitialValues1] = useState(initialValues);
   const [questionId, setQuestionId] = useState(0);
   const [prevOptAlphabet, setOptionAlphabet] = useState(["A", "B"]);
   const [validationSchema, setValidationSchema] = useState({});
   const [initialValues, setInitialValues] = useState({});
   const [data, setData] = useState({});
   const [option, setOptions] = useState(null);
+  const [initialLength, setInitialLength] = useState(0);
   const [correctAnswerOption, setCorrectAnswerOption] = useState("");
-  // const [buttonType, setButtonType] = useState("");
   const [lastIndex, setLastIndex] = useState(0);
   const location = useLocation();
   const formik = useFormik({
@@ -49,31 +39,31 @@ export default function Dashboard() {
     initialValues: initialValues,
     validationSchema: Yup.object(validationSchema),
     onSubmit: (values, { resetForm }) => {
-      // console.log("valuesss--->", values, data["question_id"]);
-      values["id"] = data["question_id"];
-      values["answer_id"] = data["answer_id"];
-      values["correct_option"] = data["correct_option"];
-      values["options"] = data["options"];
-      values["option_length"] = prevOptAlphabet.length;
-      resetForm({ values: "" });
+      console.log("valuesss---->", values);
+      // values["id"] = data["question_id"];
+      // values["answer_id"] = data["answer_id"];
+      // values["correct_option"] = data["correct_option"];
+      // values["options"] = data["options"];
+      // values["option_length"] = prevOptAlphabet.length;
+      // resetForm({ values: "" });
 
-      handleResetNameField();
-      editQuestionData(values)
-        .then((data) => {
-          setOptions(null);
-          console.log("dataaaaa", data.message);
-          resetForm({ values: "" });
-          localStorage.setItem("isEdited", "yes");
-          navigate("/quiz-list");
-          setQuestionId(0);
-          setData({});
-          setInitialValues({});
-          setOptions({});
-          setCorrectAnswerOption({});
-          setValidationSchema({});
-          setOptionAlphabet(["A", "B"]);
-        })
-        .catch((err) => console.log(err));
+      // handleResetNameField();
+      // editQuestionData(values)
+      //   .then((data) => {
+      //     setOptions(null);
+      //     // console.log("dataaaaa", data.message);
+      //     resetForm({ values: "" });
+      //     localStorage.setItem("isEdited", "yes");
+      //     navigate("/quiz-list");
+      //     setQuestionId(0);
+      //     setData({});
+      //     setInitialValues({});
+      //     setOptions({});
+      //     setCorrectAnswerOption({});
+      //     setValidationSchema({});
+      //     setOptionAlphabet(["A", "B"]);
+      //   })
+      //   .catch((err) => console.log(err));
     },
   });
 
@@ -85,11 +75,8 @@ export default function Dashboard() {
       .then((data) => {
         let result = {};
         let opts = {};
-        // Iterate through the data array
-        // console.log("********data from api*********", data.data.data);
         for (const item of data.data.data) {
           Object.keys(item).map((vals, i) => {
-            // console.log(">>>>>valesssss****",item);
             if (vals == "option_id" || vals == "options") {
               // Check if the optionId already exists in the result object
               if (result.hasOwnProperty("options")) {
@@ -114,6 +101,7 @@ export default function Dashboard() {
           });
         }
         setOptions(Object.keys(result["options"]).length);
+        setInitialLength(Object.keys(result["options"]).length);
         let TempArr = [...prevOptAlphabet];
         if (Object.keys(result["options"]).length > TempArr.length) {
           for (let i = 3; i < Object.keys(result["options"]).length + 1; i++) {
@@ -122,17 +110,62 @@ export default function Dashboard() {
             TempArr.push(currentAlphabet);
           }
         }
+
         setOptionAlphabet([...TempArr]);
+        setLastIndex(TempArr.length - 1);
         Object.keys(result["options"]).map((opt, i) => {
           const a = result["answer_id"];
           if (parseInt(opt) == parseInt(a)) {
             const charCode = TempArr[i].charCodeAt(0);
             const currentAlphabet = String.fromCharCode(charCode);
             setCorrectAnswerOption(currentAlphabet);
-            // result["correct_option"] = currentAlphabet;
           }
         });
         setData(result);
+
+        // update hadnleInitial options
+        let updatedInitialValues = {};
+        let updatedValidationSchema = {};
+        Object.keys(result).map((val, i) => {
+          if (val == "options") {
+            const tempArr = Object.keys(result["options"]);
+            TempArr.map((opt, i) => {
+              updatedInitialValues[`option${opt}`] =
+                result["options"][tempArr[i]]; // Add the new key-value pair
+              const tempOpt = `option${opt}`;
+              updatedValidationSchema[`option${opt}`] = Yup.string()
+                .required(`Please enter option`)
+                .test(
+                  "contains-only-spaces",
+                  "Option must not contain only spaces",
+                  (value) => {
+                    return !/^\s+$/.test(value);
+                  }
+                );
+            });
+          } else {
+            if (val == "questions") {
+              updatedInitialValues["question"] = result[val];
+              updatedValidationSchema[`question`] = Yup.string()
+                .required(`Please enter question`)
+                .test(
+                  "contains-only-spaces",
+                  "Question must not contain only spaces",
+                  (value) => {
+                    return !/^\s+$/.test(value);
+                  }
+                );
+            } else if (val == "answer_id") {
+              updatedInitialValues["selectField"] = TempArr[result[val] - 1];
+              data["selectedField"] = TempArr[data[val] - 1];
+              updatedValidationSchema[`selectField`] = Yup.string().required(
+                "Please select a correct option"
+              );
+            }
+          }
+        });
+        setInitialValues(updatedInitialValues);
+        setValidationSchema(updatedValidationSchema);
       })
       .catch((err) => console.log("------->", err));
   };
@@ -185,33 +218,29 @@ export default function Dashboard() {
                 return !/^\s+$/.test(value);
               }
             );
-          // formik.values.question = data[val];
         } else if (val == "answer_id") {
           updatedInitialValues["selectField"] = prevOptAlphabet[data[val] - 1];
           data["selectedField"] = prevOptAlphabet[data[val] - 1];
           updatedValidationSchema[`selectField`] = Yup.string().required(
             "Please select a correct option"
           );
-          // formik.values.selectedField = prevOptAlphabet[data[val] - 1];
-
-          // updatedInitialValues['selectField'] = data[val];
         }
       }
     });
-    console.log("****updatedInitialValues**", updatedInitialValues);
     setInitialValues(updatedInitialValues);
     setValidationSchema(updatedValidationSchema);
   };
   useEffect(() => {
     if (option > 0) {
-      console.log("when data updated", option, data);
       handleInitialOptions();
     }
-  }, [data, option, prevOptAlphabet, lastIndex]);
-  useEffect(() => {
-    console.log("--initialValues1-->", initialValues);
-    formik.resetForm(initialValues);
-  }, [initialValues]);
+  }, [data, option, lastIndex]);
+  // useEffect(() => {
+  //   console.log("initialLength == option",initialLength == option,initialLength,option);
+  //   if (initialLength == option) {
+  //     formik.resetForm(initialValues);
+  //   }
+  // }, [initialValues, initialLength,option]);
 
   const handleOptionNumber = () => {
     // setButtonType("add");
@@ -282,8 +311,10 @@ export default function Dashboard() {
       }
     });
   };
-
- 
+  const handleCancel = () => {
+    console.log("handleQ");
+    navigate("/quiz-list");
+  };
 
   return (
     <Layout>
@@ -325,11 +356,9 @@ export default function Dashboard() {
 
                           {prevOptAlphabet?.map((opt, i) => {
                             let a = Object.keys(data["options"]);
-            
                             if (i < lastIndex || i < 2) {
                               return (
                                 <div className="col-md-12">
-
                                   <label
                                     htmlFor={`option${prevOptAlphabet[i]}`}
                                     className="form-label"
@@ -470,6 +499,19 @@ export default function Dashboard() {
                           <div
                             className={`col-md-12 pt-2 ${styles.question_submit}`}
                           >
+                            <button
+                              className="btn text-center"
+                              type="button"
+                              styles={{
+                                background: "#BFC1C2 ",
+                                display: "flex",
+                                justifyContent: "space-between",
+                              }}
+                              // disabled={loading}
+                              onClick={handleCancel}
+                            >
+                              Cancel
+                            </button>
                             <button
                               className="btn btn-primary text-center"
                               type="submit"

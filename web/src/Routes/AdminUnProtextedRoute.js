@@ -6,7 +6,7 @@ const AdminUnProtextedRoute = ({children}) => {
     const auth = useContext(AdminContext);
     if (auth.admin) {
       // user is not authenticated
-      return <Navigate to="/players" />;
+      return <Navigate to="/dashboard" />;
     }
     return children;
 }

@@ -17,8 +17,8 @@ export default function Header({ toggleSidebar }) {
   }
   const handleLogout = (event) => {
     event.preventDefault();
-    localStorage.removeItem("Tradeshow-token");
-    localStorage.removeItem("Tradeshow");
+    localStorage.removeItem("admin-token");
+    localStorage.removeItem("admin");
 
     window.location.href = "/admin-login";
   };

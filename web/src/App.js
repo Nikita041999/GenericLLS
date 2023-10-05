@@ -34,6 +34,7 @@ import Dashboard from "containers/Dashboard";
 import QuestionList from "containers/QuestionList";
 import { QuestionProvider } from "lib/contexts/questionContext";
 import EditQuestion from "../src/containers/EditQuestion";
+import CreateQuestion from "containers/CreateQuestion";
 // import { GoogleLoginButton } from "react-social-login-buttons";
 
 // import { ProtectedRoute } from "Routes/ProtectedRoute";
@@ -103,6 +104,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/dashboard"
+                  element={
+                    <AdminProtectedRoute>
+                      <Dashboard />
+                    </AdminProtectedRoute>
+                  }
+                />
+                <Route
                   path="/players"
                   element={
                     <AdminProtectedRoute>
@@ -110,11 +119,12 @@ function App() {
                     </AdminProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/add-question"
                   element={
                     <AdminProtectedRoute>
-                      <Dashboard />
+                      <CreateQuestion />
                     </AdminProtectedRoute>
                   }
                 />

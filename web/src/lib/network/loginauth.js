@@ -1,5 +1,9 @@
 import axiosClient from "../request";
 
+export function getPlayers(params) {
+  return axiosClient.get("admin/players", { params });
+}
+
 export function login(data) {
   console.log("data", data);
   return axiosClient.post("/api/login", data);
@@ -30,8 +34,8 @@ export function quizDataAdd(data) {
   return axiosClient.post("/admin/quiz-data-add", data);
 }
 
-export function quizQuestionList() {
-  return axiosClient.get("/admin/quiz-list");
+export function quizQuestionList(params) {
+  return axiosClient.get("/admin/quiz-list",{params});
 }
 
 export function getSingleQuestionData(data) {

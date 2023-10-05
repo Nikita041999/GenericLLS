@@ -8,11 +8,12 @@ import styles from "./Users.module.css";
 import menuImg from "assets/images/download_icon.svg";
 import {
   deleteUser,
-  getUsers,
+ 
   toggleBlockUser,
   getUsersByDateFilter,
   getValuesBySearchFilter,
 } from "lib/network/apis";
+import { getPlayers } from "lib/network/loginauth" 
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import viewIcon from "assets/images/viewIcon.svg";
@@ -68,12 +69,7 @@ export default function Users() {
     return newObj;
   }
 
-  // useEffect(() => {
-  //   if(playersData.length > 0){
-  //     playerData()
-  //   }
-   
-  // }, [playersData.length]);
+ 
 
 
 const playerData =()=>{
@@ -129,7 +125,7 @@ const playerData =()=>{
 
     setLoading(true);
     try {
-      getUsers(params)
+      getPlayers(params)
         .then(async (res) => {
           res.data.limit = data.limit;
           // console.log("---------res.data.data.length----->",res.data.data.length,res.data.data);

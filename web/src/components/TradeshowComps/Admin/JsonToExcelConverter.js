@@ -73,8 +73,9 @@ const JsonToExcelConverter = ({ jsonData,convertDatetime }) => {
       className={`${styles.downloadFiles}`}
       href=""
       onClick={handleConvertToExcel}
+      style={{marginBottom:'1rem'}}
     >
-      <img src={download_icon} alt="icon" />
+      <img src={download_icon} alt="icon" style={{height:'auto'}}/>
       {}
       {" Export"}
     </button>
@@ -84,8 +85,9 @@ const JsonToExcelConverter = ({ jsonData,convertDatetime }) => {
       href=""
       onClick={handleConvertToExcel}
       disabled={true}
+      style={{marginBottom:'1rem'}}
     >
-      <img src={download_icon} alt="icon" />
+      <img src={download_icon} style={{height:'auto'}} alt="icon" />
       {" Export"}
     </button>
   );

@@ -17,14 +17,17 @@ import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
 import { toast } from "react-toastify";
 import { QuestionContext } from "lib/contexts/questionContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import DeleteModal from "components/Modals/DeleteModal";
 import { Modal } from "react-bootstrap";
+import Pagination from "components/Pagination";
+import JsonToExcelConverter from "components/TradeshowComps/Admin/JsonToExcelConverter";
 
 const QuestionList = () => {
-  const { questionId, setQuestionId, handleEditQuestionId } =
-    useContext(QuestionContext);
+  // const { questionId, setQuestionId, handleEditQuestionId } =
+  //   useContext(QuestionContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [questionList, setQuestionList] = useState([]);
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -32,25 +35,49 @@ const QuestionList = () => {
   const [editOrder, setEditOrder] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState(0);
+  const [totalQuestons, setTotalQuestions] = useState(0);
+  const [pageData, setPageData] = useState({
+    currentPage: location?.state?.currentPage || 1,
+    limit: 5,
+  });
   // Add a new state variable to track the edited question text
   const [editedQuestion, setEditedQuestion] = useState("");
   const [editingQuestionId, setEditingQuestionId] = useState(null);
-  // const [typeValue, setTypeValue] = useState("");
-  const getQuestionList = () => {
-    return quizQuestionList()
+  const getQuestionList = (paginationParams = {}) => {
+    let params = {
+      page: paginationParams.page || 1,
+      limit: pageData.limit,
+    };
+    return quizQuestionList(params)
       .then((data) => {
-        console.log("data---->", data.data.data);
-        setQuestionList(data.data.data);
+        console.log("data---->", data.data);
+        setQuestionList(data.data);
+        setTotalQuestions(data.data.totalItems);
+        // setPageData(prev => {
+        //  return ({...prev,currentPage})
+        // })
         return data;
       })
       .catch((err) => console.log("errrr--->", err));
   };
 
+  useEffect(() => {
+    console.log("quiz list---->", questionList);
+  }, [questionList]);
+
+  useEffect(() => {
+    let params = {};
+    if (location) {
+      params.page = location?.state?.currentPage;
+    }
+    getQuestionList(params);
+  }, [location]);
+
   // Function to handle editing of a question
   const handleQuestionEdit = (e, tableId) => {
     // Find the question being edited
     // console.log("questionList****", questionList);
-    const editedQuestion = questionList.find(
+    const editedQuestion = questionList.data.find(
       (user, index) => index + 1 === tableId
     );
 
@@ -63,20 +90,20 @@ const QuestionList = () => {
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
       localStorage.setItem("location", "edit_quiz");
-      console.log("editedQuestion.questionId",editedQuestion.question_id);
-      localStorage.setItem("question_id", editedQuestion.question_id)
+      console.log("editedQuestion.questionId", editedQuestion.question_id);
+      localStorage.setItem("question_id", editedQuestion.question_id);
       navigate(`/edit-question?id=${editedQuestion.question_id}`);
     }
   };
   const handleQuestionSave = () => {
     // Find the question being edited
 
-    const editedQuestionIndex = questionList.findIndex(
+    const editedQuestionIndex = questionList.data.findIndex(
       (user, index) => index + 1 === editingQuestionId
     );
     if (editedQuestionIndex !== -1) {
       // If the question is found, update it with the edited text
-      const updatedQuestionList = [...questionList];
+      const updatedQuestionList = [...questionList.data];
       updatedQuestionList[editedQuestionIndex].questions = editedQuestion;
       updatedQuestionList[editedQuestionIndex].type = editedType;
       updatedQuestionList[editedQuestionIndex].order_id = editOrder;
@@ -92,12 +119,12 @@ const QuestionList = () => {
   };
 
   const handleQuestionDelete = (e, tableId) => {
-    const editedQuestionIndex = questionList.findIndex(
+    const editedQuestionIndex = questionList.data.findIndex(
       (user, index) => index + 1 === tableId
     );
     // setShowModal(!showModal)
-    console.log(editedQuestionIndex, questionList[editedQuestionIndex]);
-    const { question_id: id } = questionList[editedQuestionIndex];
+    console.log(editedQuestionIndex, questionList.data[editedQuestionIndex]);
+    const { question_id: id } = questionList.data[editedQuestionIndex];
     console.log("id", id);
     // const value = {
     //   id,
@@ -114,8 +141,8 @@ const QuestionList = () => {
   };
 
   useEffect(() => {
-    console.log("-------->",deleteId);
-    if(deleteId>0){
+    console.log("-------->", deleteId);
+    if (deleteId > 0) {
       setShowModal(true);
     }
   }, [deleteId]);
@@ -148,8 +175,9 @@ const QuestionList = () => {
     }
     if (localStorage.getItem("location")) {
       localStorage.removeItem("location");
-      localStorage.removeItem("question_id")
+      localStorage.removeItem("question_id");
     }
+
     getQuestionList();
   }, []);
   const handleTypeChange = (e) => {
@@ -165,14 +193,15 @@ const QuestionList = () => {
   const handleDelete = () => {
     console.log("delete clicked");
     const value = {
-      id: deleteId
-    }
+      id: deleteId,
+    };
     deleteQuizData(value)
       .then((data) => {
         console.log("message--->", data);
         getQuestionList();
         setShowModal(false);
-        setDeleteId(0)
+        getQuestionList({ page: questionList.currentPage });
+        setDeleteId(0);
       })
       .catch((err) => {
         console.log("errr-> ", err);
@@ -180,7 +209,6 @@ const QuestionList = () => {
   };
   const handleToggleDeleteModal = (state) => {
     setShowModal(state);
-    // setDeleteId(0)
   };
 
   const getList = () => {
@@ -193,11 +221,14 @@ const QuestionList = () => {
         </tr>
       );
     } else {
-      return questionList?.length ? (
-        questionList.map((user, i) => {
+      return questionList?.data?.length ? (
+        questionList.data.map((user, i) => {
           return (
             <tr key={i + 1} id={`table_row_${i + 1}`}>
-              <td>{i + 1}</td>
+              <td>
+                {" "}
+                {(questionList.currentPage - 1) * pageData.limit + i + 1}
+              </td>
               <td>{user.type}</td>
               <td>{user.questions}</td>
               <td>{user.order_id}</td>
@@ -237,6 +268,17 @@ const QuestionList = () => {
       );
     }
   };
+  const handleSearch = (event) => {
+    console.log("handleSearch");
+    // const { value } = event.target;
+    // getData({ search: value.trim() });
+  };
+  const convertDatetime = (datetime) => {
+    let date = new Date(datetime).toLocaleDateString("en-GB");
+    // let hours = new Date(datetime).toLocaleTimeString();
+    // return `${date} ${hours}`;
+    return `${date}`;
+  };
   return (
     <Layout>
       <main className="main-body">
@@ -244,25 +286,61 @@ const QuestionList = () => {
           <div className="row flex-fill justify-content-between">
             <div className="col-md-12">
               <div>
-                {/* <h1>Welcome Admin</h1> */}
                 <div
                   style={{ background: "#F5F5F5" }}
                   className={`${styles.list_wrapper} row mt-4`}
                 >
                   <div className={`col-md-12 col-lg-6 col-xl-4`}>
-                    <a href="/users">
-                      <div className="card_dash mb-3">
-                        <div className="cardinfo">
-                          <label>Questionnaire</label>
-                          <strong>{/* {data.present_players} */}</strong>
+                    <div>
+                      <a href="/add-question">
+                        <div className="card_dash mb-3">
+                          <div className="cardinfo">
+                            <label>Questionnaire</label>
+                            <strong>{totalQuestons}</strong>
+                          </div>
+                          <div className="cardIcon">
+                            <img src={questionListSvg} alt="icon" />
+                          </div>
                         </div>
-                        <div className="cardIcon">
-                          <img src={questionListSvg} alt="icon" />
-                        </div>
-                      </div>
-                    </a>
+                      </a>
+                    </div>
+
+                    <div className="col-md-12">
+                      <hr />
+                    </div>
                   </div>
 
+                  <div>
+                    <div className="col-md-12" >
+                      <div className={`${styles.filterSection} row`}>
+                        <div className="col-md-3">
+                          <a
+                            href="/add-question"
+                            className={styles.add_question}
+                          >
+                            Add Question
+                          </a>
+                        </div>
+                        <div className="col-md-3"></div>
+                        <div className="col-md-6 align-self-end mb-3">
+                          <div className={`${styles.serachbar}`}>
+                            <input
+                              type="search"
+                              className={`form-control`}
+                              // className= {`${styles.form_control} ${styles.search_input}`}
+                              placeholder="Search"
+                              onChange={handleSearch}
+                              maxLength={12}
+                            />
+                          </div>
+                        </div>
+
+                        {/* <div className="col-md-3">
+                  <JsonToExcelConverter jsonData={[]} convertDatetime={convertDatetime}/>
+                </div> */}
+                      </div>
+                    </div>
+                  </div>
                   <div className="table-responsive">
                     <table className="table">
                       <thead>
@@ -274,31 +352,33 @@ const QuestionList = () => {
                           <th>Actions</th>
                         </tr>
                       </thead>
-                      <tbody>{questionList?.length > 0 && getList()}</tbody>
+                      <tbody>
+                        {questionList.data?.length > 0 && getList()}
+                      </tbody>
                     </table>
                   </div>
 
-                  {/* <Pagination
-                    totalItems={data.totalItems}
-                    currentPage={data.currentPage}
-                    totalPages={data.totalPages}
-                    getData={getData}
-                    limit={data.limit}
+                  <Pagination
+                    totalItems={questionList.totalItems}
+                    currentPage={questionList.currentPage}
+                    totalPages={questionList.totalPages}
+                    getData={getQuestionList}
+                    limit={pageData.limit}
                     loading={isLoading}
-                  /> */}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </main>
-      {showModal===true && (
+      {showModal === true && (
         <DeleteModal
           showModal={showModal}
           handleToggleDeleteModal={handleToggleDeleteModal}
           handleDelete={handleDelete}
           module={"Question"}
-          setDeleteId = {setDeleteId}
+          setDeleteId={setDeleteId}
         />
       )}
     </Layout>

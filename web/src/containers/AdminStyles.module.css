@@ -1,6 +1,6 @@
 .question_submit {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .button_wrapper > div {
@@ -29,12 +29,23 @@
   background: "#F5F5F5";
 }
 .list_wrapper > div {
-  display: flex;
-  width: 100%;
+  
 }
 
 .li_wrapper ul li {
   background: "#fff";
+}
+.add_question{
+  text-decoration: none;
+  background-color: #E60200;
+  padding: 0.5rem;
+  color: white;
+  border-radius: 6px;
+  position: relative;
+  top: 1rem;
+}
+.add_question:hover{
+  color: #fff;
 }
 
 

@@ -2,7 +2,7 @@ import logo from "assets/images/trdeshowlogo.png";
 import userIcon from "assets/images/users.svg";
 import eventIcon from "assets/images/events.svg";
 import questionList from "assets/images/multi-picklist.svg";
-import styles from '../../containers/Users.module.css'
+import styles from "../../containers/Users.module.css";
 import dashbordIcon from "assets/images/manage_masters.svg";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -10,23 +10,29 @@ import { useLocation } from "react-router-dom";
 export default function Sidebar({ toggleSidebar }) {
   const location = useLocation();
   const [menus, setMenus] = useState([
+    { name: "Dashboard", url: "/dashboard", icon: eventIcon },
     // { name: "Dashboard", url: "/dashboard", icon: dashbordIcon },
     { name: "Players", url: "/players", icon: userIcon },
-    { name: "Add Question", url: "/add-question", icon: eventIcon },
     { name: "Questionnaire", url: "/quiz-list", icon: questionList },
     // { name: "Questions", url: "/quiz-list", icon: userIcon },
     // { name: "Events", url: "/events", icon: eventIcon },
   ]);
   const handleClick = (e) => {
-    e.preventDefault()
-  }
+    e.preventDefault();
+  };
   const getMenus = () => {
     return menus.map((menu, index) => {
       let pathname = location.pathname.split("/")[1];
+      // console.log("menu.url--->", menu.url);
       // console.log("pathname", pathname);
-      return (
-        // <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>
-        <li className={`/${pathname}` == menu.url ? "active" : ""} key={index}>
+      return `/${pathname}` == menu.url ? (
+        <li className={styles.active} key={index}>
+          <a href={menu.url}>
+            <img src={menu.icon} alt="" /> {menu.name}
+          </a>
+        </li>
+      ) : (
+        <li key={index}>
           <a href={menu.url}>
             <img src={menu.icon} alt="" /> {menu.name}
           </a>
@@ -44,7 +50,11 @@ export default function Sidebar({ toggleSidebar }) {
         onClick={toggleSidebar}
       ></button>
       <div className={`text-center w-100`}>
-        <a href="" onClick={(e) => e.preventDefault()} className={`${styles.logo}`}>
+        <a
+          href=""
+          onClick={(e) => e.preventDefault()}
+          className={`${styles.logo}`}
+        >
           <img src={logo} alt="logo" />
         </a>
       </div>

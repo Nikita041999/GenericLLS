@@ -29,9 +29,9 @@ export default function DeleteModal({
         {/* <div className="text-center mb-4">
           <img src={cancelIcon} width="50" alt="delete" />
         </div> */}
-        <h3>Delete {module}</h3>
+        {/* <h3>Delete {module}</h3> */}
         <p className="mb-4">
-          Are you sure you want to delete this {module.toLocaleLowerCase()}.
+          Are you sure you want to delete this {module.toLocaleLowerCase()}?
         </p>
         <button
           type="button"

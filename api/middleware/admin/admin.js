@@ -3,7 +3,21 @@ import { wordCorrection } from "../../utils/helper.js";
 import CryptoJS from "crypto-js";
 import { generateJWT } from "../../utils/jwt.js";
 
-export const login = async () => {
+function getPaginationFromRequest(request, count) {
+  let page_no = request ? Number(request.page) : 1;
+  let limit = request ? Number(request.limit) : 20; // Similar to "PAGE_SIZE"
+  let skip = (page_no - 1) * limit; // For page 1, the skip is: (1 - 1)  20 => 0 * 20 = 0
+  let total_pages = Math.ceil(count / limit);
+  return {
+    limit,
+    skip,
+    page_no: page_no,
+    total_pages,
+  };
+}
+
+export const login = async (req,res) => {
+  console.log("req.body",req.body);
   let { email, password } = req.body;
   password = CryptoJS.SHA512(password, process.env.EncryptionKEY).toString();
   if ((email, password)) {
@@ -73,13 +87,13 @@ export const quizDataAdd = async (req, res) => {
   console.log(Object.keys(req.body).length);
   console.log(req.body);
   let { question, selectField } = req.body;
-  question = wordCorrection(question)
+  question = wordCorrection(question);
   Object.entries(req.body).map(async (opt, index) => {
     if (opt[0].includes("option")) {
       const ansOpt = opt[0][opt[0].length - 1];
       if (selectField === ansOpt) {
         // console.log(answer,opt[1]);
-        selectField =wordCorrection(opt[1]);
+        selectField = wordCorrection(opt[1]);
       }
     }
   });
@@ -137,14 +151,33 @@ export const quizDataAdd = async (req, res) => {
 };
 
 export const quizList = async (req, res) => {
+  const { page, limit } = req.query;
   const con = await getConnection();
-  console.log(">>>>body", req.body, Object.keys(req.body).length);
-  const getQuizListQuery = "select * from questions";
+  console.log(">>>>", page, limit);
+  const getQuizListQuery = "select * from questions order by question_id desc";
   con.query(getQuizListQuery, []).then((data) => {
-    if (data.length > 0) {
+    if (data[0].length > 0) {
+      console.log(data[0].length);
+      const count = data[0].length;
+      let pagination;
+      if (page && limit) {
+        pagination = getPaginationFromRequest({ page, limit }, count);
+      }
+      console.log("pppp", pagination);
       res
         .status(200)
-        .send({ data: data[0], status: true, message: "All question List" });
+        .send({
+          data: data[0].slice(
+            pagination.skip,
+            pagination.skip + parseInt(pagination.limit)
+          ),
+          status: true,
+          message: "All question List",
+          totalItems: count,
+          totalData: data[0],
+          totalPages: pagination.total_pages,
+          currentPage: pagination.page_no,
+        });
     }
   });
 };
@@ -288,3 +321,104 @@ WHERE question_id = ?;`;
       res.send({ message: `Cannot update data, err${err}`, status: false });
     });
 };
+
+export const getPlayers = async (req, res) => {
+  let { fromDate, toDate, isPresentStatus, isSearchKeyword, page, limit } =
+    req.query;
+
+  const con = await getConnection();
+  con.connect((err) => {
+    if (err) {
+      console.log("Error!::)", err);
+      throw err;
+    } else {
+      console.log("Db connected!");
+    }
+  });
+
+  let query = `select * from players where 1=1`;
+  let values = [];
+
+  if (fromDate && toDate && !isSearchKeyword) {
+    // console.log("************insiode fromdate todate****");
+    query += " AND created_at BETWEEN ? AND ?";
+    values.push(fromDate);
+    values.push(toDate);
+  }
+
+  if (fromDate && toDate && isSearchKeyword) {
+    // console.log("************insiode fromdate todate****");
+    query +=
+      " AND created_at BETWEEN ? AND ? AND (LOWER(firstname) LIKE ? OR LOWER(lastname) LIKE ? OR LOWER(email_address) LIKE ? OR LOWER(city) LIKE ? OR LOWER(institute) LIKE ? OR LOWER(country) LIKE ?)";
+    values.push(fromDate);
+    values.push(toDate);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    values.push(`%${isSearchKeyword.toLowerCase()}%`);
+    // values = Array(5).fill(`%${isSearchKeyword.toLowerCase()}%`)
+    // console.log("query**********with search#######*", values);
+    // `SELECT * FROM players
+    // WHERE created_at BETWEEN '2023-08-15T00:00:00Z' AND '2023-12-15T00:00:00Z'
+    // AND (LOWER(firstname) LIKE '%nikita%' OR LOWER(lastname) IS NULL OR LOWER(email_address) IS NULL OR LOWER(city) IS NULL OR LOWER(institute) IS NULL);
+    // `
+  }
+
+  if (isSearchKeyword && !fromDate && !toDate) {
+    query +=
+      " AND (LOWER(firstname) LIKE ? OR LOWER(lastname) LIKE ? OR LOWER(email_address) LIKE ? OR LOWER(city) LIKE ? OR LOWER(institute) LIKE ?) ";
+    values = Array(5).fill(`%${isSearchKeyword.toLowerCase()}%`);
+  }
+
+  query += " order by id desc"
+  // console.log("query, values ****************", query, values);
+  con
+    .query(query, values)
+    .then(
+      (data) => {
+        if (data[0].length >= 1) {
+          const count = data[0].length;
+          let pagination;
+          if (page && limit) {
+            pagination = getPaginationFromRequest({ page, limit }, count);
+          }
+          res.send({
+            data: data[0].slice(
+              pagination.skip,
+              pagination.skip + parseInt(pagination.limit)
+            ),
+            totalData: data[0],
+            message: "data get succesfully",
+            status: true,
+            totalItems: count,
+            totalPages: pagination.total_pages,
+            currentPage: pagination.page_no,
+          });
+        } else {
+          res.send({ data: [], message: "Data Not Found", status: false });
+        }
+      },
+      (error) => {
+        // console.log("Data Not Found::", error);
+        res.send({
+          data: [],
+          message: "Data not found",
+          status: false,
+          error: error,
+        });
+      }
+    )
+    .catch((err) => {
+      // console.log("Data Not Found: catch::", err);
+      res.send({
+        data: [],
+        message: "Some error :",
+        status: false,
+        error: err,
+      });
+    })
+    .then( () => con.end());
+};
+

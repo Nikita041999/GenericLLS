@@ -10,7 +10,7 @@ export default function Pagination({
   loading,
 }) {
   useEffect(() => {
-    // console.log("currentPage in useEffect", currentPage);
+    console.log("currentPage in useEffect", currentPage,limit);
   }, [currentPage]);
   const handlePageClick = (event) => {
     const newOffset = ((event.selected + 1) * limit) % totalItems;
@@ -21,8 +21,8 @@ export default function Pagination({
     // setItemOffset(newOffset);
   };
   return (
-    <div className="text-center">
-      <div className="pagination-box pagination-sec d-flex align-items-center flex-wrap pt-3">
+    <div className="text-center" >
+      <div className="pagination-box pagination-sec d-flex align-items-center flex-wrap pt-3" style={{width:'100%',display:"flex",justifyContent:'space-between'}}>
         {loading ? (
           <div className="numbers-pag me-auto"></div>
         ) : (

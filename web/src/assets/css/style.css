@@ -266,7 +266,7 @@ textarea.form-control.serviceDesHeight { min-height: 300px; resize: vertical; }
 .assignSerBox { border: 1px solid #ECE2D3; padding: 15px; margin-bottom: 15px; }
 
 .btn.btn-primary.btnBordered { border: 2px solid #F06D91; background: #fff !important; color:#F06D91 !important; }
-.btn.btn-primary.btnBordered:hover { background: #E60200 !important; color:#fff !important; }
+.btn.btn-primary.btnBordered:hover { background: #E60200 ; color:#fff !important; }
 
 .white-box .select2-container {
 	max-width: 100%;
