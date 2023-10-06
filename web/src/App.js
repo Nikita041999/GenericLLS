@@ -32,7 +32,7 @@ import { AdminProtectedRoute } from "Routes/AdminProtectedRoute";
 import AddQuestion from "components/TradeshowComps/AddQuestion";
 import Dashboard from "containers/Dashboard";
 import QuestionList from "containers/QuestionList";
-import { QuestionProvider } from "lib/contexts/questionContext";
+// import { QuestionProvider } from "lib/contexts/questionContext";
 import EditQuestion from "../src/containers/EditQuestion";
 import CreateQuestion from "containers/CreateQuestion";
 // import { GoogleLoginButton } from "react-social-login-buttons";
@@ -41,34 +41,33 @@ import CreateQuestion from "containers/CreateQuestion";
 // import PlayerLoginProtectedRoute from "Routes/PlayerLoginProtectedRoute";
 
 function App() {
-  // const { started, setStarted } = usePlayerContext();
+  const { started, setStarted } = usePlayerContext();
 
   const audioRef = useRef(null);
 
-  // useEffect(() => {
-  //   let sessionStarted = sessionStorage.getItem("started");
-  //   // console.log("***sessionStarted****",sessionStarted);
-  //   if (sessionStarted == "yes") {
-  //     setStarted(true);
-  //   }
-  //   if (started == true) {
-  //     audioRef.current === null
-  //       ? console.log("Audio component is not loaded yet.")
-  //       : audioRef.current.play();
-  //   } else {
-  //     // console.log("***music paused***");
-  //     audioRef.current.pause();
-  //   }
-  //   audioRef.current.loop = true;
-  // }, [started]);
-  // console.log();
+  useEffect(() => {
+    let sessionStarted = sessionStorage.getItem("started");
+    // console.log("***sessionStarted****",sessionStarted);
+    if (sessionStarted == "yes") {
+      setStarted(true);
+    }
+    if (started == true) {
+      audioRef.current === null
+        ? console.log("Audio component is not loaded yet.")
+        : audioRef.current.play();
+    } else {
+      // console.log("***music paused***");
+      audioRef.current.pause();
+    }
+    audioRef.current.loop = true;
+  }, [started]);
+  console.log();
   return (
     <div className="">
       <audio ref={audioRef} src={audioFile} autoPlay />
       <BrowserRouter>
         <AdminProvider>
           <UserProvider>
-            <QuestionProvider>
               <ToastContainer
                 autoClose={10000}
                 hideProgressBar
@@ -225,7 +224,6 @@ function App() {
                   }
                 />
               </Routes>
-            </QuestionProvider>
           </UserProvider>
         </AdminProvider>
       </BrowserRouter>

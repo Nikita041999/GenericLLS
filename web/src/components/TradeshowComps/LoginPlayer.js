@@ -28,6 +28,7 @@ import { getFacebookUrl } from "utils/getFacebookUrl";
 import { getTwitterUrl } from "utils/getTwitterUrl";
 
 const LoginPlayer = () => {
+  const { handleScreenStart, started } = usePlayerContext();
   const [loading, setLoading] = useState(false);
   const [showError, setShowError] = useState(false);
   const [error, setError] = useState("");
@@ -380,6 +381,7 @@ const LoginPlayer = () => {
           password,
         };
         localStorage.setItem("user", JSON.stringify(res.data[0]));
+        handleScreenStart()
         navigate(`/introduction`);
         // window.location.href = "/users";
       } else if (res.data.length == 0) {
@@ -476,6 +478,13 @@ const LoginPlayer = () => {
     // const url = 'http://localhost:3000/auth/linkedin'
     window.location.assign(`${url}`);
   };
+
+  //handle start music
+  // useEffect(() => {
+  //   if (started == true) {
+  //     navigate("/");
+  //   }
+  // }, [started]);
   return (
     <div className={styles.loginPage}>
       <div className="top-hor-img">

@@ -14,6 +14,10 @@
   /* padding: 0.5rem; */
   border-radius: 12px;
 }
+.filterSection{
+  display: flex;
+  flex-direction: column;
+}
 .question_warpper {
   /* background: #ffffff;
     margin:0.5rem;
@@ -42,10 +46,18 @@
   color: white;
   border-radius: 6px;
   position: relative;
-  top: 1rem;
+  top: 2rem;
 }
 .add_question:hover{
   color: #fff;
+}
+
+@media screen and (max-width: 575px)
+{
+  .filterSection{
+    display: flex;
+    flex-direction: row;
+  }
 }
 
 

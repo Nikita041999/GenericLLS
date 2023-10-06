@@ -768,9 +768,6 @@ h1,
   display: flex;
   justify-content: space-between;
 }
-.question_submit + button {
-  background-color: "#bfc1c2";
-}
 .active {
   background: "#FF5C5C !important";
 }

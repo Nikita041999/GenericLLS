@@ -65,8 +65,6 @@ export default function CreateQuestion() {
   const [buttonType, setButtonType] = useState("");
   const [validationSchema, setValidationSchema] = useState(validationSchema1);
   useEffect(() => {
-  }, [option]);
-  useEffect(() => {
     localStorage.setItem("location", "add_question");
   }, []);
 
@@ -76,14 +74,14 @@ export default function CreateQuestion() {
     onSubmit: (values, { resetForm }) => {
       // setShowError(false);
       // setLoading(true);
-      console.log(values);
+      // console.log(values);
       resetForm({ values: "" });
 
       handleResetNameField();
-      console.log("values", values);
+      // console.log("values", values);
       quizDataAdd(values)
         .then((data) => {
-          console.log("data------>", data);
+          // console.log("data------>", data);
           setOptions(null);
           resetForm({ values: "" });
           localStorage.setItem("isQuestionAdded", "yes");
@@ -112,13 +110,13 @@ export default function CreateQuestion() {
   };
 
   const handleDeleteOption = (alphabet) => {
-    console.log("*****", alphabet);
+    // console.log("*****", alphabet);
     setButtonType("delete");
     setDeleteOptionId(alphabet);
     let updatedOptionArray = prevOptAlphabet;
-    console.log(">>>>>>>updatedOptionArray", updatedOptionArray);
+    // console.log(">>>>>>>updatedOptionArray", updatedOptionArray);
     const lastAlphabet = updatedOptionArray.pop();
-    console.log("-----updated array", updatedOptionArray, alphabet);
+    // console.log("-----updated array", updatedOptionArray, alphabet);
     setOptionAlphabet((prev) => [...updatedOptionArray]);
     const charCode = alphabet.charCodeAt(0);
     const currentAlphabet = String.fromCharCode(charCode + 1);
@@ -140,6 +138,7 @@ export default function CreateQuestion() {
             <div
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
+              key={index}
             >
               <span
                 onClick={() => handleDeleteOption(alphabet)}
@@ -181,6 +180,7 @@ export default function CreateQuestion() {
             <div
               className={`col-md-12 ${styles.list_box_wrapper}`}
               id={`remove_${alphabet}`}
+              key={index}
             >
               <label htmlFor={`option${alphabet}`} className="form-label">
                 {`${alphabet}`}
@@ -247,7 +247,6 @@ export default function CreateQuestion() {
     });
   };
   const handleResetNameField = () => {
-    console.log("initialValues******", initialValues);
     Object.keys(initialValues).map((opt, index) => {
       if (opt.includes("option")) {
         formik.setFieldValue(opt, "");
@@ -256,28 +255,8 @@ export default function CreateQuestion() {
     // formik.setFieldValue("optionC", "");
   };
   const handleCancel = () => {
-    console.log("handleQ");
-    navigate('/quiz-list')
-  }
-  useEffect(() => { 
-    console.log("***initialValues**", prevOptAlphabet);
-    console.log(">>>initialValues>>", initialValues);
-    console.log(")))))))validationSchema>>>>>>>>", validationSchema);
-
-    console.log("buttonType---->", buttonType);
-    // if (buttonType == "add") {
-    //   handleAddOptionButtonCLick();
-    // }
-    // if (buttonType == "delete") {
-    //   handleDeleteOptionButtonCLick();
-    // }
-  }, [
-    prevOptAlphabet,
-    initialValues,
-    validationSchema,
-    buttonType,
-    deleteOptionId,
-  ]);
+    navigate("/quiz-list");
+  };
   return (
     <Layout>
       <main className="main-body">
@@ -297,14 +276,6 @@ export default function CreateQuestion() {
                     <form onSubmit={formik.handleSubmit}>
                       <div className="row g-3">
                         <div className="col-md-12">
-                          {/* <TextField
-                            name="question"
-                            showIcon={false}
-                            // icon={"emailSvg"}
-                            placeholder="Enter your question here"
-                            formik={formik}
-                            label={"Question"}
-                          /> */}
                           <div>
                             <label htmlFor="question" className="form-label">
                               Question
@@ -419,10 +390,9 @@ export default function CreateQuestion() {
                         <div
                           className={`col-md-12 pt-2 ${styles.question_submit}`}
                         >
-                        <button
-                            className="btn text-center"
+                          <button
+                            className={`btn btn-dark text-center`}
                             type="button"
-                            styles={{ background: "black" }}
                             onClick={handleCancel}
                             // disabled={loading}
                           >

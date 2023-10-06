@@ -16,7 +16,7 @@ import questionListSvg from "assets/images/multi-picklist.svg";
 import { deleteQuizData } from "lib/network/loginauth";
 // import {FaEdit} from 'react-icons/fa'
 import { toast } from "react-toastify";
-import { QuestionContext } from "lib/contexts/questionContext";
+// import { QuestionContext } from "lib/contexts/questionContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import DeleteModal from "components/Modals/DeleteModal";
 import { Modal } from "react-bootstrap";
@@ -36,6 +36,7 @@ const QuestionList = () => {
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState(0);
   const [totalQuestons, setTotalQuestions] = useState(0);
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [pageData, setPageData] = useState({
     currentPage: location?.state?.currentPage || 1,
     limit: 5,
@@ -47,10 +48,12 @@ const QuestionList = () => {
     let params = {
       page: paginationParams.page || 1,
       limit: pageData.limit,
+      search: paginationParams.search || "",
+      isSearchKeyword: paginationParams.search,
     };
     return quizQuestionList(params)
       .then((data) => {
-        console.log("data---->", data.data);
+        // console.log("data---->", data.data);
         setQuestionList(data.data);
         setTotalQuestions(data.data.totalItems);
         // setPageData(prev => {
@@ -62,16 +65,12 @@ const QuestionList = () => {
   };
 
   useEffect(() => {
-    console.log("quiz list---->", questionList);
-  }, [questionList]);
-
-  useEffect(() => {
     let params = {};
     if (location) {
       params.page = location?.state?.currentPage;
     }
     getQuestionList(params);
-  }, [location]);
+  }, [location,searchKeyword]);
 
   // Function to handle editing of a question
   const handleQuestionEdit = (e, tableId) => {
@@ -90,7 +89,7 @@ const QuestionList = () => {
       setEditingQuestionId(tableId);
       setIsEditable(!isEditable);
       localStorage.setItem("location", "edit_quiz");
-      console.log("editedQuestion.questionId", editedQuestion.question_id);
+      // console.log("editedQuestion.questionId", editedQuestion.question_id);
       localStorage.setItem("question_id", editedQuestion.question_id);
       navigate(`/edit-question?id=${editedQuestion.question_id}`);
     }
@@ -112,7 +111,7 @@ const QuestionList = () => {
           console.log(data);
         })
         .catch((err) => console.log("----->", err));
-      console.log("***updatedQuestionList***", updatedQuestionList);
+      // console.log("***updatedQuestionList***", updatedQuestionList);
       setQuestionList(updatedQuestionList);
       setIsEditable(false);
     }
@@ -123,9 +122,9 @@ const QuestionList = () => {
       (user, index) => index + 1 === tableId
     );
     // setShowModal(!showModal)
-    console.log(editedQuestionIndex, questionList.data[editedQuestionIndex]);
+    // console.log(editedQuestionIndex, questionList.data[editedQuestionIndex]);
     const { question_id: id } = questionList.data[editedQuestionIndex];
-    console.log("id", id);
+    // console.log("id", id);
     // const value = {
     //   id,
     // };
@@ -141,7 +140,6 @@ const QuestionList = () => {
   };
 
   useEffect(() => {
-    console.log("-------->", deleteId);
     if (deleteId > 0) {
       setShowModal(true);
     }
@@ -191,13 +189,11 @@ const QuestionList = () => {
   };
 
   const handleDelete = () => {
-    console.log("delete clicked");
     const value = {
       id: deleteId,
     };
     deleteQuizData(value)
       .then((data) => {
-        console.log("message--->", data);
         getQuestionList();
         setShowModal(false);
         getQuestionList({ page: questionList.currentPage });
@@ -269,9 +265,8 @@ const QuestionList = () => {
     }
   };
   const handleSearch = (event) => {
-    console.log("handleSearch");
-    // const { value } = event.target;
-    // getData({ search: value.trim() });
+    const { value } = event.target;
+    getQuestionList({ search: value.trim() });
   };
   const convertDatetime = (datetime) => {
     let date = new Date(datetime).toLocaleDateString("en-GB");
@@ -292,7 +287,7 @@ const QuestionList = () => {
                 >
                   <div className={`col-md-12 col-lg-6 col-xl-4`}>
                     <div>
-                      <a href="/add-question">
+                      <a href="">
                         <div className="card_dash mb-3">
                           <div className="cardinfo">
                             <label>Questionnaire</label>
@@ -305,15 +300,15 @@ const QuestionList = () => {
                       </a>
                     </div>
 
-                    <div className="col-md-12">
+                    
+                  </div>
+                  <div className="col-md-12">
                       <hr />
                     </div>
-                  </div>
-
                   <div>
                     <div className="col-md-12" >
                       <div className={`${styles.filterSection} row`}>
-                        <div className="col-md-3">
+                        <div className="col-md-6">
                           <a
                             href="/add-question"
                             className={styles.add_question}

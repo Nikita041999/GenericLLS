@@ -15,7 +15,7 @@ export const QuestionProvider = ({ children }) => {
   let [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation()
   const handleEditQuestionId = (id) => {
-    console.log("***** id is     ",id);
+    // console.log("***** id is     ",id);
     setQuestionId(id);
     //   const queryParams = new URLSearchParams(location.id);
     // console.log("queryParams*****",queryParams);
@@ -31,7 +31,7 @@ export const QuestionProvider = ({ children }) => {
         let result = {};
         let opts = {};
         // Iterate through the data array
-        console.log('********data from api*********',data.data.data);
+        // console.log('********data from api*********',data.data.data);
         for (const item of data.data.data) {
           Object.keys(item).map((vals, i) => {
             // console.log(">>>>>valesssss****",item);

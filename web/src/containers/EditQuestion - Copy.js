@@ -29,23 +29,24 @@ export default function Dashboard() {
   const [validationSchema, setValidationSchema] = useState({});
   const [initialValues, setInitialValues] = useState({});
   const [data, setData] = useState({});
-  // const [option, setOptions] = useState(null);
+  const [option, setOptions] = useState(null);
   const [initialLength, setInitialLength] = useState(0);
   const [correctAnswerOption, setCorrectAnswerOption] = useState("");
-  // const [lastIndex, setLastIndex] = useState(0);
+  const [lastIndex, setLastIndex] = useState(0);
   const location = useLocation();
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
     validationSchema: Yup.object(validationSchema),
     onSubmit: (values, { resetForm }) => {
-      console.log("valuesss---->", values);
+      // console.log("valuesss---->", values);
       // values["id"] = data["question_id"];
       // values["answer_id"] = data["answer_id"];
       // values["correct_option"] = data["correct_option"];
       // values["options"] = data["options"];
       // values["option_length"] = prevOptAlphabet.length;
       // resetForm({ values: "" });
+
       // handleResetNameField();
       // editQuestionData(values)
       //   .then((data) => {
@@ -99,7 +100,7 @@ export default function Dashboard() {
             }
           });
         }
-        // setOptions(Object.keys(result["options"]).length);
+        setOptions(Object.keys(result["options"]).length);
         setInitialLength(Object.keys(result["options"]).length);
         let TempArr = [...prevOptAlphabet];
         if (Object.keys(result["options"]).length > TempArr.length) {
@@ -111,7 +112,7 @@ export default function Dashboard() {
         }
 
         setOptionAlphabet([...TempArr]);
-        // setLastIndex(TempArr.length - 1);
+        setLastIndex(TempArr.length - 1);
         Object.keys(result["options"]).map((opt, i) => {
           const a = result["answer_id"];
           if (parseInt(opt) == parseInt(a)) {
@@ -184,7 +185,7 @@ export default function Dashboard() {
           progress: undefined,
           theme: "colored",
         });
-      }, [100]);
+      },[100])
       navigate("/quiz-list");
     }
     if (!localStorage.getItem("location")) {
@@ -193,20 +194,96 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    console.log(prevOptAlphabet);
-  },[prevOptAlphabet])
-
-  useEffect(() => {
     if (questionId > 0) {
       getEditQuestionData();
     }
   }, [questionId]);
 
+  const handleInitialOptions = () => {
+    let updatedInitialValues = {};
+    let updatedValidationSchema = {};
+    Object.keys(data).map((val, i) => {
+      if (val == "options") {
+        const tempArr = Object.keys(data["options"]);
+        prevOptAlphabet.map((opt, i) => {
+          updatedInitialValues[`option${opt}`] = data["options"][tempArr[i]]; // Add the new key-value pair
+          const tempOpt = `option${opt}`;
+          updatedValidationSchema[`option${opt}`] = Yup.string()
+            .required(`Please enter option`)
+            .test(
+              "contains-only-spaces",
+              "Option must not contain only spaces",
+              (value) => {
+                return !/^\s+$/.test(value);
+              }
+            );
+        });
+      } else {
+        if (val == "questions") {
+          updatedInitialValues["question"] = data[val];
+          updatedValidationSchema[`question`] = Yup.string()
+            .required(`Please enter question`)
+            .test(
+              "contains-only-spaces",
+              "Question must not contain only spaces",
+              (value) => {
+                return !/^\s+$/.test(value);
+              }
+            );
+        } else if (val == "answer_id") {
+          updatedInitialValues["selectField"] = prevOptAlphabet[data[val] - 1];
+          data["selectedField"] = prevOptAlphabet[data[val] - 1];
+          updatedValidationSchema[`selectField`] = Yup.string().required(
+            "Please select a correct option"
+          );
+        }
+      }
+    });
+    setInitialValues(updatedInitialValues);
+    setValidationSchema(updatedValidationSchema);
+  };
+  useEffect(() => {
+    // if (option > 0) {
+      handleInitialOptions();
+    // }
+  }, [data]);
+  // useEffect(() => {
+  //   console.log("initialLength == option",initialLength == option,initialLength,option);
+  //   if (initialLength == option) {
+  //     formik.resetForm(initialValues);
+  //   }
+  // }, [initialValues, initialLength,option]);
+
+  // const handleOptionNumber = () => {
+  //   // setButtonType("add");
+  //   console.log('----->',prevOptAlphabet);
+  //   const charCode = prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
+  //   const currentAlphabet = String.fromCharCode(charCode + 1);
+  //   setOptionAlphabet((prev) => [...prev, currentAlphabet]);
+  //   setLastIndex(prevOptAlphabet.length);
+  //   const updatedInitialValues = {
+  //     ...initialValues, // Spread the existing state
+  //     [`option${currentAlphabet}`]: "", // Add the new key-value pair
+  //   };
+  //   setInitialValues(updatedInitialValues);
+  //   const updatedValidationSchema = {
+  //     ...validationSchema,
+  //     [`option${currentAlphabet}`]:
+  //       Yup.string().required(`Please enter option`).test(
+  //         "contains-only-spaces",
+  //         "Question must not contain only spaces",
+  //         (value) => {
+  //           return !/^\s+$/.test(value);
+  //         }
+  //       ),
+  //   };
+  //   setValidationSchema(updatedValidationSchema);
+  // };
+
   const handleOptionNumber = () => {
     const charCode = prevOptAlphabet[prevOptAlphabet.length - 1].charCodeAt(0);
     const currentAlphabet = String.fromCharCode(charCode + 1);
     setOptionAlphabet((prev) => [...prev, currentAlphabet]);
-    console.log("handleOptionNumber initial values",initialValues);
     const updatedInitialValues = {
       ...initialValues, // Spread the existing state
       [`option${currentAlphabet}`]: "", // Add the new key-value pair
@@ -220,99 +297,31 @@ export default function Dashboard() {
     setValidationSchema(updatedValidationSchema);
   };
 
-  const handleAddOptionButtonCLick = () => {
-    return prevOptAlphabet.map((opt, i) => {
-      if (i>1 && i == prevOptAlphabet.length - 1) {
-        return (
-          <div
-            className={`col-md-12 ${styles.list_box_wrapper}`}
-            id={`remove_${opt}`}
-            key={i}
-          >
-            <span
-              style={{ cursor: "pointer" }}
-              onClick={() =>
-                handleDeleteOption(opt)
-              }
-            >
-              <GrSubtractCircle />
-            </span>
-            <label
-              htmlFor={`option${opt}`}
-              className="form-label"
-            >
-              {`${opt}`}
-            </label>
-            <input
-              id={`option${opt}`}
-              name={`option${opt}`}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              autoComplete="off"
-              value={
-                formik.values[
-                  `option${opt}`
-                ]
-              }
-              className="form-control"
-            />
-            {formik.touched[
-              `option${opt}`
-            ] &&
-            formik.errors[
-              `option${opt}`
-            ] ? (
-              <div className="error">
-                {
-                  formik.errors[
-                    `option${opt}`
-                  ]
-                }
-              </div>
-            ) : null}
-          </div>
-        );
-      } else {
-        return (
-          <div className="col-md-12" key={i}>
-            <label
-              htmlFor={`option${opt}`}
-              className="form-label"
-            >
-              {`${opt}`}
-            </label>
-            <input
-              id={`option${opt}`}
-              name={`option${opt}`}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              autoComplete="off"
-              value={
-                formik.values[
-                  `option${opt}`
-                ]
-              }
-              className="form-control"
-            />
-            {formik.touched[
-              `option${opt}`
-            ] &&
-            formik.errors[
-              `option${opt}`
-            ] ? (
-              <div className="error">
-                {
-                  formik.errors[
-                    `option${opt}`
-                  ]
-                }
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-    })
-  };
+
+  // const handleAddOptionButtonCLick = () => {
+  //   return (
+  //     <div
+  //       className={`col-md-12 ${styles.list_box_wrapper}`}
+  //       id={`remove_${prevOptAlphabet[lastIndex]}`}
+  //     >
+  //       <span onClick={() => handleDeleteOption(prevOptAlphabet[lastIndex])}>
+  //         <GrSubtractCircle />
+  //       </span>
+  //       <TextField
+  //         name={`option${prevOptAlphabet[lastIndex]}`}
+  //         showIcon={false}
+  //         placeholder={`option`}
+  //         formik={formik}
+  //         // onBlur={formik.handleBlur}
+  //         label={`${prevOptAlphabet[lastIndex]}`}
+  //       />
+  //     </div>
+  //   );
+  // };
+
+  // useEffect(() => {
+
+  // },[option,lastIndex])
 
   const handleDeleteOption = (alphabet) => {
     let updatedOptionArray = prevOptAlphabet;
@@ -342,11 +351,6 @@ export default function Dashboard() {
       }
     });
   };
-
-  useEffect(() => {
-    console.log('initialValues------>',initialValues)
-    console.log("validationSchema------>",validationSchema);
-  },[initialValues,validationSchema]);
   const handleCancel = () => {
     navigate("/quiz-list");
   };
@@ -389,51 +393,40 @@ export default function Dashboard() {
                             </div>
                           </div>
 
-                          {/* {prevOptAlphabet?.map((opt, i) => {
-                            if (i>1 && i == prevOptAlphabet.length - 1) {
+                          {prevOptAlphabet?.map((opt, i) => {
+                            let a = Object.keys(data["options"]);
+                            if (i < lastIndex || i < 2) {
                               return (
-                                <div
-                                  className={`col-md-12 ${styles.list_box_wrapper}`}
-                                  id={`remove_${opt}`}
-                                  key={i}
-                                >
-                                  <span
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() =>
-                                      handleDeleteOption(opt)
-                                    }
-                                  >
-                                    <GrSubtractCircle />
-                                  </span>
+                                <div className="col-md-12" key={i}>
                                   <label
-                                    htmlFor={`option${opt}`}
+                                    htmlFor={`option${prevOptAlphabet[i]}`}
                                     className="form-label"
                                   >
-                                    {`${opt}`}
+                                    {`${prevOptAlphabet[i]}`}
                                   </label>
                                   <input
-                                    id={`option${opt}`}
-                                    name={`option${opt}`}
+                                    id="question"
+                                    name={`option${prevOptAlphabet[i]}`}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     autoComplete="off"
                                     value={
                                       formik.values[
-                                        `option${opt}`
+                                        `option${prevOptAlphabet[i]}`
                                       ]
                                     }
                                     className="form-control"
                                   />
                                   {formik.touched[
-                                    `option${opt}`
+                                    `option${prevOptAlphabet[i]}`
                                   ] &&
                                   formik.errors[
-                                    `option${opt}`
+                                    `option${prevOptAlphabet[i]}`
                                   ] ? (
                                     <div className="error">
                                       {
                                         formik.errors[
-                                          `option${opt}`
+                                          `option${prevOptAlphabet[i]}`
                                         ]
                                       }
                                     </div>
@@ -442,36 +435,47 @@ export default function Dashboard() {
                               );
                             } else {
                               return (
-                                <div className="col-md-12" key={i}>
+                                <div
+                                  className={`col-md-12 ${styles.list_box_wrapper}`}
+                                  id={`remove_${prevOptAlphabet[i]}`} key={i}
+                                >
+                                  <span
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() =>
+                                      handleDeleteOption(prevOptAlphabet[i])
+                                    }
+                                  >
+                                    <GrSubtractCircle />
+                                  </span>
                                   <label
-                                    htmlFor={`option${opt}`}
+                                    htmlFor={`option${prevOptAlphabet[i]}`}
                                     className="form-label"
                                   >
-                                    {`${opt}`}
+                                    {`${prevOptAlphabet[i]}`}
                                   </label>
                                   <input
-                                    id={`option${opt}`}
-                                    name={`option${opt}`}
+                                    id="question"
+                                    name={`option${prevOptAlphabet[i]}`}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     autoComplete="off"
                                     value={
                                       formik.values[
-                                        `option${opt}`
+                                        `option${prevOptAlphabet[i]}`
                                       ]
                                     }
                                     className="form-control"
                                   />
                                   {formik.touched[
-                                    `option${opt}`
+                                    `option${prevOptAlphabet[i]}`
                                   ] &&
                                   formik.errors[
-                                    `option${opt}`
+                                    `option${prevOptAlphabet[i]}`
                                   ] ? (
                                     <div className="error">
                                       {
                                         formik.errors[
-                                          `option${opt}`
+                                          `option${prevOptAlphabet[i]}`
                                         ]
                                       }
                                     </div>
@@ -479,10 +483,7 @@ export default function Dashboard() {
                                 </div>
                               );
                             }
-                          })} */}
-                          {
-                            prevOptAlphabet.length>0 && handleAddOptionButtonCLick()
-                          }
+                          })}
 
                           <button
                             onClick={handleOptionNumber}

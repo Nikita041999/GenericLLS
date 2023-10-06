@@ -16,7 +16,6 @@ const StartPage = () => {
   const navigate = useNavigate();
   const handleStartQuiz = () => {
     handleScreenStart()
-
     let val = ["started"];
     let check = sessionStorage.getItem("page");
     if (!check) {

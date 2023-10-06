@@ -10,7 +10,7 @@ export default function Pagination({
   loading,
 }) {
   useEffect(() => {
-    console.log("currentPage in useEffect", currentPage,limit);
+    // console.log("currentPage in useEffect", currentPage,limit);
   }, [currentPage]);
   const handlePageClick = (event) => {
     const newOffset = ((event.selected + 1) * limit) % totalItems;
